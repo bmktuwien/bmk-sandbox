@@ -1,0 +1,22 @@
+name:                cl-bjsos-test
+version:             0.0.0.1
+synopsis:            Cross Language BJSOS Test
+license:             AllRightsReserved
+license-file:        LICENSE
+author:              Kim Bong Min
+maintainer:          bong-min.kim@rise-world.com
+-- copyright:
+category:            Data
+build-type:          Simple
+cabal-version:       >=1.10
+description:
+  See "Data.BJSOS" for a specification of the BJSOS format.
+
+Executable run-bjsos-tests
+  default-language: Haskell2010
+  build-depends: base, aeson, bytestring, bjsos, deepseq-generics, text, json-builder, process
+  build-depends: test-framework, test-framework-quickcheck2, QuickCheck
+
+  hs-source-dirs: src
+  main-is: BjsosTests.hs
+  ghc-options: -Wall -fwarn-tabs -funbox-strict-fields -O2

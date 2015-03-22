@@ -1,0 +1,35 @@
+name:                crypto-client
+version:             0.1.0.0
+-- synopsis:
+-- description:
+author:              BMK
+maintainer:          bong-min.kim@rise-world.com
+-- copyright:
+category:            Network
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable crypto-client
+  default-language: Haskell2010
+  hs-source-dirs: src
+  main-is: Client.hs
+  other-modules: GKSL
+  build-depends:
+    base >=4.5 && <4.8,
+    cmdargs ==0.10.*,
+    blaze-builder ==0.3.*,
+    bytestring >=0.9 && <0.11,
+    time ==1.4.*,
+    io-streams ==1.1.*,
+    http-types ==0.8.*,
+    http-streams ==0.6.*,
+    text ==0.11.*,
+    binary ==0.7.*,
+    crypto-random-api ==0.2.*,
+    crypto-pubkey==0.1.*,
+    cipher-aes ==0.1.*,
+    cryptohash ==0.8.*,
+    base16-bytestring ==0.1.*,
+    cryptopp ==0.1.*,
+    base16-bytestring
+  ghc-options: -Wall -threaded -O2 -rtsopts -fno-warn-unused-do-bind
