@@ -1,0 +1,56 @@
+declare PROMPT=$'%{\e[0;36m%}%n@%m:%{\e[0;35m%}%3~$%{\e[0m%} '
+
+autoload -U colors && colors
+autoload -U compinit && compinit
+
+#auto completion
+zmodload -i zsh/complist
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*' menu select=2
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%S%d%s'
+
+#aliases
+alias emacs='emacs -nw --no-desktop'
+alias rm='rm -i'
+alias ls='ls --color=auto'
+
+#env aliases
+alias rvmenv='source ~/.rvm/environments/ruby-1.9.3-p484'
+
+#exporting environment variables
+export JAVA_HOME=/opt/jdk1.7.0_51
+export PATH=$PATH:/opt/erlang/bin/
+export PATH=$PATH:~/scripts
+export PATH=$PATH:/home/bmk/.cabal/bin/
+export PATH=$PATH:/home/bmk/.python-env/bin
+#export EDITOR="/usr/bin/emacs -nw --no-desktop"
+export EDITOR="/usr/bin/vim"
+export TERM="xterm"
+
+#hashes
+#hash -d prog=/home/bmk/svn/praxis/programming
+#hash -d eprog=/home/bmk/svn/praxis/tutor/eprog
+#hash -d fprog=/home/bmk/svn/praxis/tutor/funprog
+#hash -d mp3=/home/bmk/media/mp3
+#hash -d jboss=/home/bmk/uni/praktikum/jboss-5.1.0.GA/bin
+
+#setting options
+setopt all_export
+setopt auto_cd
+setopt auto_list
+setopt no_beep
+setopt complete_aliases
+
+#history setting
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+
+#emacs mode key binding
+bindkey -e

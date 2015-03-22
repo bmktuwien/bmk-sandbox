@@ -1,0 +1,133 @@
+;;; Commentary:
+;;; DOTEMACS --- my simple config file
+
+;;; Code:
+
+;;; Load initial stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/libs")
+
+(load "~/.emacs.d/init.el")
+
+(load "haskell_mode_init.el")
+(load "cc_mode_init.el")
+(load "c-eldoc.el")
+
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
+
+;;; Appearance
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (disable-theme 'zenburn)
+
+(require 'font-lock)
+(global-font-lock-mode t)
+(setq font-lock-maximum-decoration t)
+(set-scroll-bar-mode nil)
+
+(set-face-font 'default "-unknown-DejaVu Sans Mono-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")
+
+;(custom-set-faces
+;;  '(default ((t (:stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 100 :width normal :family "misc-fixed"))))
+;;  '(flydabbrev-highlight-face ((((class color) (background dark)) (:background "dodgerblue1"))))
+;;  '(font-lock-builtin-face ((((class color) (background dark)) (:foreground "lightseagreen" :bold t))))
+;;  '(font-lock-comment-face ((((class color) (background dark)) (:foreground "cyan" :bold t))))
+;;  '(font-lock-constant-face ((((class color) (background dark)) (:foreground "wheat" :bold t))))
+;;  '(font-lock-doc-face ((((class color) (background dark)) (:foreground "turquoise" :bold t))))
+;;  '(font-lock-function-name-face ((((class color) (background dark)) (:foreground "magenta" :bold t))))
+;;  '(font-lock-keyword-face ((((class color) (background dark)) (:foreground "lightseagreen" :bold t))))
+;;  '(font-lock-string-face ((((class color) (background dark)) (:foreground "turquoise" :bold t))))
+;;  '(font-lock-type-face ((((class color) (background dark)) (:foreground "aquamarine" :bold t))))
+;;  '(font-lock-variable-name-face ((((class color) (background dark)) (:foreground "yellow" :bold t))))
+;;  '(font-lock-warning-face ((((class color) (background dark)) (:foreground "white" :background "red" :bold t))))
+;;  '(show-paren-match-face ((((class color)) (:background "steelblue"))) t))
+
+;;; Custom settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq          prelude-guru     nil)
+(setq          prelude-flyspell nil)
+(setq-default  show-trailing-whitespace t)
+
+(desktop-save-mode  1)
+(ido-mode           1)
+
+;;; Custom Bindings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(global-set-key (kbd "C-x g")       'goto-line)
+(global-set-key (kbd "C-x C-b")     'buffer-menu)
+(global-set-key (kbd "C-x C-y")     'indent-region)
+(global-set-key (kbd "M-SPC")       'dabbrev-expand)
+(global-set-key (kbd "C-x a r")     'align-regexp)
+(global-set-key (kbd "C-<return>")  'other-window)
+(global-set-key [f2]                'eshell)
+(global-set-key [f3]                'ansi-term)
+(global-set-key [f4]                'query-replace)
+(global-set-key [f5]                'switch-to-buffer)
+(global-set-key [f6]                'sr-speedbar-toggle)
+(global-set-key [f7]                'project-explorer-open)
+;(global-set-key [f8]                'find-grep)
+
+;;; Shell
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq shell-file-name "zsh")
+(setq shell-command-switch "-ic")
+
+;;; Modules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'auto-complete)
+(require 'auto-complete-config)
+(ac-config-default)
+
+;;----------------------------------------------------------
+(defun ac-c-header-init ()
+  (require 'auto-complete-c-headers)
+  (add-to-list 'ac-sources 'ac-source-c-headers)
+  (add-to-list 'achead:include-directories '"/usr/include"))
+
+(add-hook 'c++-mode-hook 'ac-c-header-init)
+(add-hook 'c-mode-hook   'ac-c-header-init)
+
+;;----------------------------------------------------------
+(define-key global-map (kbd "C-c ,") 'iedit-mode)
+
+;;----------------------------------------------------------
+(require 'semantic/ia)
+(require 'semantic/symref)
+(require 'semantic/bovine/gcc)
+
+(semantic-mode 1)
+(global-ede-mode 1)
+
+(global-semantic-idle-scheduler-mode)
+(global-semantic-idle-completions-mode)
+(global-semantic-decoration-mode)
+(global-semantic-highlight-func-mode)
+(global-semantic-show-unmatched-syntax-mode)
+
+(semanticdb-enable-gnu-global-databases 'c-mode)
+(semanticdb-enable-gnu-global-databases 'c++-mode)
+
+(semantic-add-system-include "/usr/include" 'c-mode)
+(semantic-add-system-include "/usr/include" 'c++-mode)
+
+(defun add-semantic-to-autocomplete()
+  (add-to-list 'ac-sources 'ac-source-semantic-raw)
+  (local-set-key (kbd "M-.") 'semantic-ia-fast-jump))
+(add-hook 'c-mode-common-hook 'add-semantic-to-autocomplete)
+
+;;----------------------------------------------------------
+(require 'project-explorer)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Hooks
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun my-term-hook ()
+  (setq show-trailing-whitespace nil))
+(add-hook 'term-mode-hook 'my-term-hook)
+
+;;EOF
