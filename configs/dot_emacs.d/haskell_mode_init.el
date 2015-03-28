@@ -1,7 +1,12 @@
 (load "haskell-mode-autoloads")
 
-(require 'haskell-interactive-mode)
-(require 'haskell-process)
+; activate haskell-mode for the happy files
+(add-to-list 'auto-mode-alist '("\\.y\\'" . haskell-mode))
+; activate haskell-mode for the alex files
+(add-to-list 'auto-mode-alist '("\\.x\\'" . haskell-mode))
+
+(autoload 'ghc-init "ghc" nil t)
+(autoload 'ghc-debug "ghc" nil t)
 
 (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
   (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
@@ -14,7 +19,7 @@
 
  ;; Use notify.el (if you have it installed) at the end of running
  ;; Cabal commands or generally things worth notifying.
- '(haskell-notify-p t)
+ ;'(haskell-notify-p t)
 
  ;; To enable tags generation on save.
  '(haskell-tags-on-save t)
@@ -22,10 +27,6 @@
  ;; To enable stylish on save.
  '(haskell-stylish-on-save t)
 
- ;; Haskell process settings
- '(haskell-process-suggest-remove-import-lines t)
- '(haskell-process-auto-import-loaded-modules t)
- '(haskell-process-log t)
  '(haskell-process-type 'cabal-repl))
 
 ;; Haskell main editing mode key bindings.
@@ -33,28 +34,26 @@
   ;; Use simple indentation.
   ;;(turn-on-haskell-simple-indent)
   (turn-on-haskell-indentation)
-  ;;(define-key haskell-mode-map (kbd "<return>") 'haskell-simple-indent-newline-same-col)
+  ;;(turn-on-hi2)
+  ;;(structured-haskell-mode)
 
-  (interactive-haskell-mode)
+  ;; Init ghc-mod
+  (ghc-init)
+
+  (setq tab-width 4)
 
   ;; Load the current file (and make a session if not already made).
   (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-file)
 
   ;; Switch to the REPL.
   (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  ;; “Bring” the REPL, hiding all other windows apart from the source
-  ;; and the REPL.
-  (define-key haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
 
-  ;; Build the Cabal project.
-  (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  ;; Interactively choose the Cabal command to run.
-  (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal)
 
   ;; Get the type and info of the symbol at point, print it in the
   ;; message buffer.
-  (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
-  (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
+  (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+  (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+  (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
 
   ;; Contextually do clever things on the space key, in particular:
   ;;   1. Complete imports, letting you choose the module name.
@@ -81,5 +80,4 @@
 
 (add-hook 'haskell-mode-hook 'haskell-hook)
 
-;; suppress annoying stylish-haskell warning pop-ups
 (add-to-list 'warning-suppress-types '(stylish-haskell discard-error))
