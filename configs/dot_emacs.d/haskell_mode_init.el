@@ -5,12 +5,15 @@
 ; activate haskell-mode for the alex files
 (add-to-list 'auto-mode-alist '("\\.x\\'" . haskell-mode))
 
-(autoload 'ghc-init "ghc" nil t)
+(autoload 'ghc-init  "ghc" nil t)
 (autoload 'ghc-debug "ghc" nil t)
 
 (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
   (setenv "PATH" (concat my-cabal-path ":" (getenv "PATH")))
   (add-to-list 'exec-path my-cabal-path))
+
+(require 'haskell-interactive-mode)
+(require 'haskell-process)
 
 ;; Customization
 (custom-set-variables
@@ -19,7 +22,7 @@
 
  ;; Use notify.el (if you have it installed) at the end of running
  ;; Cabal commands or generally things worth notifying.
- ;'(haskell-notify-p t)
+ '(haskell-notify-p t)
 
  ;; To enable tags generation on save.
  '(haskell-tags-on-save t)
