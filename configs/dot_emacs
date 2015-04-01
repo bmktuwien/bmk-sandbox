@@ -121,6 +121,17 @@
 (require 'project-explorer)
 
 ;;----------------------------------------------------------
+(setq auto-highlight-symbol-mode-map
+      (let ((map (make-sparse-keymap)))
+        (define-key map (kbd "s-<left>"    ) 'ahs-backward            )
+        (define-key map (kbd "s-<right>"   ) 'ahs-forward             )
+        (define-key map (kbd "M-s-<left>"  ) 'ahs-backward-definition )
+        (define-key map (kbd "M-s-<right>" ) 'ahs-forward-definition  )
+        (define-key map (kbd "M--"         ) 'ahs-back-to-start       )
+        (define-key map (kbd "C-x C-'"     ) 'ahs-change-range        )
+        (define-key map (kbd "C-x C-a"     ) 'ahs-edit-mode           )
+        map))
+
 (require 'auto-highlight-symbol)
 (global-auto-highlight-symbol-mode)
 
