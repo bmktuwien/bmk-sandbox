@@ -7,6 +7,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/libs")
+(add-to-list 'load-path "~/.emacs.d/themes")
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "~/.emacs.d/themes"))
 
 (load "~/.emacs.d/init.el")
 
@@ -14,11 +17,11 @@
 (load "cc_mode_init.el")
 (load "c-eldoc.el")
 
+
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
 
 ;;; Appearance
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (disable-theme 'zenburn)
 
 (require 'font-lock)
 (global-font-lock-mode t)
@@ -27,20 +30,8 @@
 
 (set-face-font 'default "-unknown-DejaVu Sans Mono-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")
 
-;(custom-set-faces
-;;  '(default ((t (:stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 100 :width normal :family "misc-fixed"))))
-;;  '(flydabbrev-highlight-face ((((class color) (background dark)) (:background "dodgerblue1"))))
-;;  '(font-lock-builtin-face ((((class color) (background dark)) (:foreground "lightseagreen" :bold t))))
-;;  '(font-lock-comment-face ((((class color) (background dark)) (:foreground "cyan" :bold t))))
-;;  '(font-lock-constant-face ((((class color) (background dark)) (:foreground "wheat" :bold t))))
-;;  '(font-lock-doc-face ((((class color) (background dark)) (:foreground "turquoise" :bold t))))
-;;  '(font-lock-function-name-face ((((class color) (background dark)) (:foreground "magenta" :bold t))))
-;;  '(font-lock-keyword-face ((((class color) (background dark)) (:foreground "lightseagreen" :bold t))))
-;;  '(font-lock-string-face ((((class color) (background dark)) (:foreground "turquoise" :bold t))))
-;;  '(font-lock-type-face ((((class color) (background dark)) (:foreground "aquamarine" :bold t))))
-;;  '(font-lock-variable-name-face ((((class color) (background dark)) (:foreground "yellow" :bold t))))
-;;  '(font-lock-warning-face ((((class color) (background dark)) (:foreground "white" :background "red" :bold t))))
-;;  '(show-paren-match-face ((((class color)) (:background "steelblue"))) t))
+(when (require 'dream-theme nil 'noerror)
+  (load-theme 'dream t nil))
 
 ;;; Custom settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -67,6 +58,20 @@
 (global-set-key [f6]                'sr-speedbar-toggle)
 (global-set-key [f7]                'project-explorer-open)
 ;(global-set-key [f8]                'find-grep)
+
+;;; Minibuffer
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq
+ enable-recursive-minibuffers nil      ;;  don't allow mb cmds in the mb
+ max-mini-window-height 3              ;;  max 3 lines
+ minibuffer-scroll-window t            ;;  C-M-v scrolls....
+ resize-mini-windows t)
+
+(icomplete-mode t)                     ;; completion in minibuffer
+(setq
+ icomplete-prospects-height 2          ;; don't spam my minibuffer
+ icomplete-compute-delay 0)            ;; don't wait
 
 ;;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
