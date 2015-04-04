@@ -1,12 +1,12 @@
 ;;; Commentary:
-;;; DOTEMACS --- my simple config file
+;;; DOTEMACS
 
 ;;; Code:
 
 ;;; Load initial stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(add-to-list 'load-path "~/.emacs.d/libs")
+(add-to-list 'load-path "~/.emacs.d/inits")
 (add-to-list 'load-path "~/.emacs.d/themes")
 (add-to-list 'custom-theme-load-path
              (expand-file-name "~/.emacs.d/themes"))
@@ -14,9 +14,8 @@
 (load "~/.emacs.d/init.el")
 
 (load "haskell_mode_init.el")
+(load "python_mode_init.el")
 (load "cc_mode_init.el")
-(load "c-eldoc.el")
-
 
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
 
@@ -24,19 +23,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'font-lock)
-(global-font-lock-mode t)
+(global-font-lock-mode             t)
 (setq font-lock-maximum-decoration t)
-(set-scroll-bar-mode nil)
-
-(set-face-font 'default "-unknown-DejaVu Sans Mono-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")
+(set-scroll-bar-mode               nil)
 
 (when (require 'dream-theme nil 'noerror)
   (load-theme 'dream t nil))
 
+(set-face-font 'default "-unknown-DejaVu Sans Mono-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")
+
 ;;; Custom settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq          prelude-guru     nil)
-(setq          prelude-flyspell nil)
+(setq          prelude-guru             nil)
+(setq          prelude-flyspell         nil)
 (setq-default  show-trailing-whitespace t)
 
 (desktop-save-mode  1)
@@ -64,19 +63,23 @@
 
 (setq
  enable-recursive-minibuffers nil      ;;  don't allow mb cmds in the mb
- max-mini-window-height 3              ;;  max 3 lines
- minibuffer-scroll-window t            ;;  C-M-v scrolls....
- resize-mini-windows t)
+ max-mini-window-height       3        ;;  max 3 lines
+ minibuffer-scroll-window     t        ;;  C-M-v scrolls....
+ resize-mini-windows          t)
 
 (icomplete-mode t)                     ;; completion in minibuffer
 (setq
  icomplete-prospects-height 2          ;; don't spam my minibuffer
- icomplete-compute-delay 0)            ;; don't wait
+ icomplete-compute-delay    0)         ;; don't wait
 
 ;;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq shell-file-name "zsh")
+(setq shell-file-name "bash")
 (setq shell-command-switch "-ic")
+
+(defun my-term-hook ()
+  (setq show-trailing-whitespace nil))
+(add-hook 'term-mode-hook 'my-term-hook)
 
 ;;; Modules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -84,43 +87,6 @@
 (require 'auto-complete)
 (require 'auto-complete-config)
 (ac-config-default)
-
-;;----------------------------------------------------------
-(defun ac-c-header-init ()
-  (require 'auto-complete-c-headers)
-  (add-to-list 'ac-sources 'ac-source-c-headers)
-  (add-to-list 'achead:include-directories '"/usr/include"))
-
-(add-hook 'c++-mode-hook 'ac-c-header-init)
-(add-hook 'c-mode-hook   'ac-c-header-init)
-
-;;----------------------------------------------------------
-(define-key global-map (kbd "C-c ,") 'iedit-mode)
-
-;;----------------------------------------------------------
-(require 'semantic/ia)
-(require 'semantic/symref)
-(require 'semantic/bovine/gcc)
-
-(semantic-mode 1)
-(global-ede-mode 1)
-
-(global-semantic-idle-scheduler-mode)
-(global-semantic-idle-completions-mode)
-(global-semantic-decoration-mode)
-(global-semantic-highlight-func-mode)
-(global-semantic-show-unmatched-syntax-mode)
-
-(semanticdb-enable-gnu-global-databases 'c-mode)
-(semanticdb-enable-gnu-global-databases 'c++-mode)
-
-(semantic-add-system-include "/usr/include" 'c-mode)
-(semantic-add-system-include "/usr/include" 'c++-mode)
-
-(defun add-semantic-to-autocomplete()
-  (add-to-list 'ac-sources 'ac-source-semantic-raw)
-  (local-set-key (kbd "M-.") 'semantic-ia-fast-jump))
-(add-hook 'c-mode-common-hook 'add-semantic-to-autocomplete)
 
 ;;----------------------------------------------------------
 (require 'project-explorer)
@@ -141,12 +107,5 @@
 (global-auto-highlight-symbol-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;; Hooks
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun my-term-hook ()
-  (setq show-trailing-whitespace nil))
-(add-hook 'term-mode-hook 'my-term-hook)
 
 ;;EOF
