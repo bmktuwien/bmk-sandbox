@@ -70,7 +70,8 @@ public class HelloServerHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
-    private void writeResponse(ChannelHandlerContext ctx, HttpRequest request, ByteBuf buf, CharSequence contentType, CharSequence contentLength) {
+    private void writeResponse(ChannelHandlerContext ctx, HttpRequest request,
+                               ByteBuf buf, CharSequence contentType, CharSequence contentLength) {
         // Decide whether to close the connection or not.
         boolean keepAlive = HttpHeaders.isKeepAlive(request);
         // Build the response object.
@@ -86,8 +87,8 @@ public class HelloServerHandler extends SimpleChannelInboundHandler<Object> {
         if (!keepAlive) {
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         } else {
+            headers.set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
             ctx.write(response, ctx.voidPromise());
-            ctx.flush();
         }
     }
 

@@ -38,8 +38,8 @@ public final class HttpStaticFileServer {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     //.handler(new LoggingHandler(LogLevel.WARN))
-                    .childHandler(new HttpStaticFileServerInitializer(sslCtx));
-                    //.childHandler(new HelloServerInitializer(workerGroup.next()));
+                    //.childHandler(new HttpStaticFileServerInitializer(sslCtx));
+                    .childHandler(new HelloServerInitializer(bossGroup.next()));
 
             b.option(ChannelOption.MAX_MESSAGES_PER_READ, Integer.MAX_VALUE);
             b.childOption(ChannelOption.ALLOCATOR, new PooledByteBufAllocator(true));
