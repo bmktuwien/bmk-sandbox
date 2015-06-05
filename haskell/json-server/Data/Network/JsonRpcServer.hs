@@ -129,9 +129,8 @@ mkRouteMap = HM.fromList . map f
     f JsonRPCRoute{..} = ((jrRouteDomain, jrRouteMethod), jrRouteFunc)
 
 jsonRPCServer :: JsonRPCRouteMap -> Application
-jsonRPCServer routeMap request respond = handle errorHandler $
-  if requestMethod request == methodPost
-    then do
+jsonRPCServer routeMap request respond
+  | requestMethod request == methodPost = handle errorHandler $ do
       eRequest <- eitherDecode' . BL.fromStrict <$> requestBody request
       case eRequest of
         Left _ -> respond $ mkHTTPErrorResp status400
@@ -143,8 +142,7 @@ jsonRPCServer routeMap request respond = handle errorHandler $
                                 "Method not found" Null
 
           respond . responseLBS status200 [] $ encode response
-    else
-      respond $ mkHTTPErrorResp status405 -- method not allowed
+  | otherwise = respond $ mkHTTPErrorResp status405 -- method not allowed
 
   where
     mkHTTPErrorResp status = responseLBS status [] BL.empty
