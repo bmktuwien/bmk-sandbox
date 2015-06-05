@@ -75,6 +75,8 @@ instance (FromJSON r) => FromJSON (JsonRpcResponse r) where
 
         return $ JsonRpcError jid jver errorCode errorMessage errorData
 
+  parseJSON _ = mzero
+
 instance ToJSON JsonRpcRequest where
   toJSON JsonRpcRequest{..} = object [ "jsonrpc" .= jrReqVer
                                      , "id"      .= jrReqId
