@@ -1,12 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes        #-}
 {-# LANGUAGE RecordWildCards   #-}
 
 module Data.Network.JsonRpcServer where
 
+import           Control.Applicative
+import           Control.Exception
 import           Control.Monad
 import           Data.Aeson
 import           Data.Aeson.Types
-import qualified Data.Text        as T
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.HashMap.Strict  as HM
+import qualified Data.Text            as T
+import qualified Data.Text.Encoding   as T
+import           Network.HTTP.Types
+import           Network.Wai
 
 data JsonRpcRequest = JsonRpcRequest
   { jrReqId     :: !Value
@@ -101,3 +109,46 @@ instance ToJSON r => ToJSON (JsonRpcResponse r) where
                       , "message" .= errMessage
                       , "data"    .= errData
                       ]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+type JsonRPCFunc = Value -> JsonRpcResponse Value
+
+data JsonRPCRoute = JsonRPCRoute
+  { jrRouteDomain :: !T.Text
+  , jrRouteMethod :: !T.Text
+  , jrRouteFunc   :: JsonRPCFunc
+  }
+
+type JsonRPCRouteMap = HM.HashMap (T.Text, T.Text) JsonRPCFunc
+
+mkRouteMap :: [JsonRPCRoute] -> JsonRPCRouteMap
+mkRouteMap = HM.fromList . map f
+  where
+    f JsonRPCRoute{..} = ((jrRouteDomain, jrRouteMethod), jrRouteFunc)
+
+jsonRPCServer :: JsonRPCRouteMap -> Application
+jsonRPCServer routeMap request respond = handle errorHandler $
+  if requestMethod request == methodPost
+    then do
+      eRequest <- eitherDecode' . BL.fromStrict <$> requestBody request
+      case eRequest of
+        Left _ -> respond $ mkHTTPErrorResp status400
+        Right JsonRpcRequest{..} -> do
+          let domain = T.decodeUtf8 $ rawPathInfo request
+              response = case HM.lookup (domain,jrReqMethod) routeMap of
+                Just rpcFunc -> rpcFunc jrReqParams
+                Nothing      -> JsonRpcError jrReqId jrReqVer (-32601)
+                                "Method not found" Null
+
+          respond . responseLBS status200 [] $ encode response
+    else
+      respond $ mkHTTPErrorResp status405 -- method not allowed
+
+  where
+    mkHTTPErrorResp status = responseLBS status [] BL.empty
+
+    errorHandler :: SomeException -> IO ResponseReceived
+    errorHandler _ =
+      respond $ mkHTTPErrorResp status500 -- internal server error
