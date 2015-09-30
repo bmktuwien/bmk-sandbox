@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import           Control.Concurrent.STM hiding (TChan)
+import           Control.Concurrent.STM hiding (TChan, readTChan)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -39,3 +39,22 @@ writeTChan (TChan _ writeVar) val = do
 
   writeTVar writeVar newEnd
   writeTVar oldEnd (TCons val newEnd)
+
+unGetTChan :: TChan a -> a -> STM ()
+unGetTChan (TChan readVar _) val = do
+  oldHead <- readTVar readVar
+  newHead <- newTVar $ TCons val oldHead
+  writeTVar readVar newHead
+
+isEmptyTChan :: TChan a -> STM Bool
+isEmptyTChan (TChan readVar _) = do
+  head <- readTVar readVar
+  readTVar head >>= \case
+    TNil -> return True
+    _    -> return False
+
+readEitherTChan :: TChan a -> TChan b -> STM (Either a b)
+readEitherTChan chanA chanB =
+  fmap Left (readTChan chanA)
+  `orElse`
+  fmap Right (readTChan chanB)
