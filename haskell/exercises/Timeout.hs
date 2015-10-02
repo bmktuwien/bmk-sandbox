@@ -1,6 +1,8 @@
+{-# LANGUAGE LambdaCase          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 import           Control.Concurrent
+import           Control.Concurrent.Async
 import           Control.Exception
 import           Data.Unique
 
@@ -36,3 +38,15 @@ timeout to action
   handle toHandler $ bracket (forkIO (threadDelay to >> throwTo tid toe))
                              (\wTid -> killThread wTid)
                              (\_ -> fmap Just action)
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+timeout' :: Int -> IO a -> IO (Maybe a)
+timeout' to action
+  | to < 0  = fmap Just action
+  | to == 0 = return Nothing
+  | otherwise = do
+      race (threadDelay to) action >>= \case
+        Left _    -> return Nothing
+        Right res -> return $ Just res
