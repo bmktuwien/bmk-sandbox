@@ -58,12 +58,13 @@ broadcastSTM Server{..} name inp = do
   clients <- readTVar serverClientsMap
   void $ forM clients $ \client -> sendMsgSTM client msg
 
+-------------------------------------------------------------------------------
+
 sendMsg :: Client -> Message -> IO ()
 sendMsg client msg = atomically $ sendMsgSTM client msg
 
 broadcast :: Server -> ClientName -> B.ByteString -> IO ()
 broadcast server name inp = atomically $ broadcastSTM server name inp
--------------------------------------------------------------------------------
 
 removeClient :: Server -> Client -> IO ()
 removeClient Server{..} Client{..} = atomically $
