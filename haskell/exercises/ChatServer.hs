@@ -5,12 +5,11 @@
 import           Control.Concurrent
 import           Control.Concurrent.Async
 import           Control.Concurrent.STM
-import           Control.Concurrent.STM.TChan
 import           Control.Exception
 import           Control.Monad
-import qualified Data.ByteString              as B
-import qualified Data.ByteString.Char8        as B8
-import qualified Data.Map.Strict              as Map
+import qualified Data.ByteString          as B
+import qualified Data.ByteString.Char8    as B8
+import qualified Data.Map.Strict          as Map
 import           GHC.IO.Handle
 import           Network
 import           Text.Printf
@@ -40,23 +39,31 @@ data Server = Server
 
 data Message = BroadCast ClientName B.ByteString
              | Tell ClientName B.ByteString
+             | Command B.ByteString
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
 newClient :: ClientName -> Handle -> STM Client
-newClient name handle = do
+newClient name hdl = do
   chan <- newTChan
-  return $ Client name handle chan
+  return $ Client name hdl chan
 
-sendMsg :: Client -> Message -> STM ()
-sendMsg Client{..} = writeTChan clientChan
+sendMsgSTM :: Client -> Message -> STM ()
+sendMsgSTM Client{..} = writeTChan clientChan
 
-broadCast :: Server -> ClientName -> B.ByteString -> IO ()
-broadCast Server{..} name inp = atomically $ do
+broadcastSTM :: Server -> ClientName -> B.ByteString -> STM ()
+broadcastSTM Server{..} name inp = do
   let msg = BroadCast name inp
   clients <- readTVar serverClientsMap
-  void $ forM clients $ \client -> sendMsg client msg
+  void $ forM clients $ \client -> sendMsgSTM client msg
+
+sendMsg :: Client -> Message -> IO ()
+sendMsg client msg = atomically $ sendMsgSTM client msg
+
+broadcast :: Server -> ClientName -> B.ByteString -> IO ()
+broadcast server name inp = atomically $ broadcastSTM server name inp
+-------------------------------------------------------------------------------
 
 removeClient :: Server -> Client -> IO ()
 removeClient Server{..} Client{..} = atomically $
@@ -64,16 +71,27 @@ removeClient Server{..} Client{..} = atomically $
 
 runClient :: Server -> Client -> IO ()
 runClient server@Server{..} client@Client{..} =
-  race_ handleMsg receiveInput
+  race_ handlerLoop receiveInput
   where
-    handleMsg = forever $ join . atomically $ do
-      msg <- readTChan clientChan
-      case msg of
-        BroadCast name msg -> return (output name msg)
+    handlerLoop = join . atomically $ do
+        msg <- readTChan clientChan
+        return $ do
+          continue <- handleMsg msg
+          when continue handlerLoop
+
+    handleMsg message = case message of
+      BroadCast name msg -> do
+        output name msg
+        return True
+      Command input ->
+        case words (B8.unpack input) of
+          _ -> do
+            broadcast server clientName input
+            return True
 
     receiveInput = forever $ do
       input <- B.hGetLine clientHandle
-      broadCast server clientName input
+      sendMsg client $ Command input
 
     output name msg =
       B8.hPutStrLn clientHandle . B8.pack $
