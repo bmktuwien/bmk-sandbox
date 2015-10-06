@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase          #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -28,13 +29,15 @@ import           Text.Printf
 type ClientName = B.ByteString
 
 data Client = Client
-            { clientName   :: ClientName
-            , clientHandle :: Handle
-            , clientChan   :: TChan Message
+            { clientName          :: ClientName
+            , clientHandle        :: Handle
+            , clientMsgChan       :: TChan Message
+            , clientBroadcastChan :: TChan Message
             }
 
 data Server = Server
-            { serverClientsMap :: TVar (Map.Map ClientName Client)
+            { serverClientsMap    :: TVar (Map.Map ClientName Client)
+            , serverBroadcastChan :: TChan Message
             }
 
 data Message = BroadCast ClientName B.ByteString
@@ -44,19 +47,19 @@ data Message = BroadCast ClientName B.ByteString
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-newClient :: ClientName -> Handle -> STM Client
-newClient name hdl = do
-  chan <- newTChan
-  return $ Client name hdl chan
+newClient :: ClientName -> Handle -> TChan Message -> STM Client
+newClient name hdl chan = do
+  msgChan <- newTChan
+  broadcastChan <- dupTChan chan
+  return $ Client name hdl msgChan broadcastChan
 
 sendMsgSTM :: Client -> Message -> STM ()
-sendMsgSTM Client{..} = writeTChan clientChan
+sendMsgSTM Client{..} = writeTChan clientMsgChan
 
 broadcastSTM :: Server -> ClientName -> B.ByteString -> STM ()
 broadcastSTM Server{..} name inp = do
   let msg = BroadCast name inp
-  clients <- readTVar serverClientsMap
-  void $ forM clients $ \client -> sendMsgSTM client msg
+  writeTChan serverBroadcastChan msg
 
 -------------------------------------------------------------------------------
 
@@ -72,27 +75,32 @@ removeClient Server{..} Client{..} = atomically $
 
 runClient :: Server -> Client -> IO ()
 runClient server@Server{..} client@Client{..} =
-  race_ handlerLoop receiveInput
+  handlerLoop `race_` receiveInput `race_` receiveBroadCast
   where
     handlerLoop = join . atomically $ do
-        msg <- readTChan clientChan
+        msg <- readTChan clientMsgChan
         return $ do
           continue <- handleMsg msg
           when continue handlerLoop
 
     handleMsg message = case message of
-      BroadCast name msg -> do
-        output name msg
-        return True
       Command input ->
         case words (B8.unpack input) of
           _ -> do
             broadcast server clientName input
             return True
+      _ -> error "invalid message type in the message channel"
 
     receiveInput = forever $ do
       input <- B.hGetLine clientHandle
       sendMsg client $ Command input
+
+    receiveBroadCast = forever $ join . atomically $ do
+      readTChan clientBroadcastChan >>= \case
+        BroadCast name msg -> return $
+          unless (name == clientName) $
+            output name msg
+        _ -> error "invalid message type in the broadcast channel"
 
     output name msg =
       B8.hPutStrLn clientHandle . B8.pack $
@@ -100,10 +108,10 @@ runClient server@Server{..} client@Client{..} =
 
 workerThread :: Server -> Handle -> IO ()
 workerThread server@Server{..} hdl = mask $ \restore -> do
-  client <- getClient hdl
+  client <- getClient
   restore (runClient server client) `finally` removeClient server client
   where
-    getClient hdl = do
+    getClient = do
       B8.hPutStrLn hdl "What is your name?"
       name <- B.hGetLine hdl
       mClient <- atomically $ do
@@ -111,7 +119,7 @@ workerThread server@Server{..} hdl = mask $ \restore -> do
         case Map.lookup name clients of
           Just _ -> return Nothing
           Nothing -> do
-            client <- newClient name hdl
+            client <- newClient name hdl serverBroadcastChan
             writeTVar serverClientsMap $ Map.insert name client clients
             return (Just client)
 
@@ -121,12 +129,12 @@ workerThread server@Server{..} hdl = mask $ \restore -> do
           return client
         Nothing -> do
           B8.hPutStrLn hdl "The name is already taken. Please choose another one."
-          getClient hdl
+          getClient
 
 -- runs the server main loop
 runServer :: IO ()
 runServer = do
-  server <- Server <$> newTVarIO Map.empty
+  server <- Server <$> newTVarIO Map.empty <*> newBroadcastTChanIO
   serverSocket <- listenOn (PortNumber 44444)
 
   forever $ do
