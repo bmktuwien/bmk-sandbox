@@ -1,7 +1,7 @@
-import Data.Numbers.Primes
-import Data.Digits
-import Data.List
-import qualified Data.HashMap as HM
+import           Data.Digits
+import qualified Data.HashMap        as HM
+import           Data.List
+import           Data.Numbers.Primes
 
 -- Utils ------------------------------------------
 
@@ -25,6 +25,10 @@ extractIndices idxs ls = extractIndices' 1 idxs ls
         (es,rs) = extractIndices' (t+1) is xs
         (es',rs') = extractIndices' (t+1) (i:is) xs
 
+allSameDigits = allTheSame . map digits'
+  where
+    digits' = sort . digits 10
+
 -- 51 ---------------------------------------------
 
 solve51 :: [[Int]]
@@ -46,3 +50,20 @@ solve51 = filter (\x -> length x == 8) $
           where
             sMap' = HM.findWithDefault HM.empty k sMap
             sMap'' = HM.insertWith (++) m [n] sMap'
+
+-- 52 ---------------------------------------------
+-- (long live brute force!!!)
+
+solve52 :: Int
+solve52 = head $ filter bingo [1..]
+  where
+    bingo x = allSameDigits [x*i | i <- [2..6]]
+
+-- 53 ---------------------------------------------
+-- (long live brute force!!!)
+
+choose n 0 = 1
+choose 0 k = 0
+choose n k = choose (n-1) (k-1) * n `div` k
+
+solve53 = length $ filter (> 1000000) [choose n k | n <- [1..100], k <- [1..n]]
