@@ -3,22 +3,28 @@
  */
 
 var data = [
-    {radius: 200, segment: 'Segment A'},
-    {radius: 74, segment: 'Segment A'},
-    {radius: 200, segment: 'Segment A'},
-    {radius: 200, segment: 'Segment A'},
-    {radius: 100, segment: 'Segment A'},
-    {radius: 280, segment: 'Segment B'},
-    {radius: 120, segment: 'Segment C'},
-    {radius: 240, segment: 'Segment C'},
-    {radius: 120, segment: 'Segment C'},
-    {radius: 270, segment: 'Segment C'}
+    {radius: 200, segment: 'Segment A', label: 'Label 1', color: 'red'},
+    {radius: 74,  segment: 'Segment A', label: 'Label 2', color: 'red'},
+    {radius: 200, segment: 'Segment A', label: 'Label 3', color: 'yellow'},
+    {radius: 200, segment: 'Segment A', label: 'Label 4', color: 'red'},
+    {radius: 100, segment: 'Segment A', label: 'Label 5', color: 'blue'},
+    {radius: 280, segment: 'Segment B', label: 'Label 6', color: 'green'},
+    {radius: 120, segment: 'Segment C', label: 'Label 7', color: 'yellow'},
+    {radius: 240, segment: 'Segment C', label: 'Label 8', color: 'red'},
+    {radius: 120, segment: 'Segment C', label: 'Label 9', color: 'black'},
+    {radius: 270, segment: 'Segment C', label: 'Label 10', color: 'black'}
 ];
 
 
 
 
 function render(data) {
+    var width = 1024,
+        height = 768,
+        radius = Math.min(width, height) / 2;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     // transform data into segments
     var segments = _.map(_.groupBy(data, 'segment'), function (group, key) {
         var size = _.max(_.values(_.countBy(group, 'radius'))) + 1;
@@ -47,19 +53,13 @@ function render(data) {
         return a - (Math.PI / 2);
     }
 
-    var color = d3.scale.category20c();
-
-    var width = 1024,
-        height = 768,
-        radius = Math.min(width, height) / 2,
-        originX = width / 2,
-        originY = height / 2 + 10;
+    var color = d3.scale.category10();
 
     var svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", "translate(" +  originX + "," +  originY + ")");
+        .attr("transform", "translate(" +  (width / 2) + "," +  (height / 2 + 10) + ")");
 
     var scaleX = d3.scale.linear().range([0, Math.PI]);
 
@@ -91,6 +91,8 @@ function render(data) {
             return _.map(trends, function(trend, i) {
                 var a = angle(scaleX(segment.x + step * (i+1))) - (Math.PI / 2);
                 return {
+                    'label': trend.label,
+                    'color': trend.color,
                     'pos': calcPoint(a, r),
                     'radius': 7
                 };
@@ -102,9 +104,51 @@ function render(data) {
     svg.selectAll("circle")
         .data(circles)
         .enter().append("circle")
-        .attr("cx", function(d) { return d.pos.x;})
-        .attr("cy", function(d) { return d.pos.y;})
-        .attr("r", function(d) {return d.radius;})
+        .attr("cx", function(d) { return d.pos.x; })
+        .attr("cy", function(d) { return d.pos.y; })
+        .attr("r", function(d) { return d.radius; })
+        .attr("fill", function(d){ return d.color; });
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    // render right-half x axis
+
+    var years = d3.scale.ordinal()
+        .domain([0,1,2,3,4])
+        .rangePoints([2000, 2015])
+        .range();
+
+    years = _.map(years, Math.floor);
+
+    var xAxisScale = d3.scale.ordinal()
+        .domain(years)
+        .rangePoints([0, radius]);
+
+    var xAxis = d3.svg.axis()
+        .scale(xAxisScale)
+        .orient("bottom");
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .call(xAxis);
+
+    // render left-half x axis
+
+    var yearsRev = years.reverse();
+    yearsRev[yearsRev.length - 1] = ''; // quick-fix not to render minYear twice
+
+    var xAxisScaleRev = d3.scale.ordinal()
+        .domain(yearsRev)
+        .rangePoints([0, radius]);
+
+    var xAxisRev = d3.svg.axis()
+        .scale(xAxisScaleRev)
+        .orient("bottom");
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(-" + radius + ",0)")
+        .call(xAxisRev);
 
 }
 
