@@ -54,6 +54,15 @@ function render(data) {
         return a - (Math.PI / 2);
     }
 
+    function calcPoint(a, r) {
+        var x = 0 + r * Math.cos(a),
+            y = 0 + r * Math.sin(a);
+
+        return { 'x': x, 'y': y};
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     var color = d3.scale.category10();
 
     var svg = d3.select("body").append("svg")
@@ -66,7 +75,7 @@ function render(data) {
 
     var arc = d3.svg.arc()
         .startAngle(function(d) { return angle(scaleX(d.x)); })
-        .endAngle(function(d) { return angle(scaleX(d.x + d.dx)); })
+        .endAngle(function(d) { return d.endAngle ? d.endAngle : angle(scaleX(d.x)); })
         .innerRadius(0)
         .outerRadius(radius);
 
@@ -75,101 +84,121 @@ function render(data) {
         .data(segments)
         .enter().append("g");
 
-    arcs.append("path")
+    var path = arcs.append("path")
         .style("fill", function(d) { return color(d.label); })
         .attr("d", arc);
 
-    arcs.append("svg:text")
-        .attr("transform", function(d) {
-            var c = arc.centroid(d),
-                x = c[0],
-                y = c[1],
-                labelr = radius + 30,
-                // pythagorean theorem for hypotenuse
-                h = Math.sqrt(x*x + y*y);
-            return "translate(" + (x/h * labelr) +  ',' + (y/h * labelr) +  ")";
-        })
-        .attr("dy", ".35em")
-        .attr("text-anchor", function(d) {
-            var endAngle = angle(scaleX(d.x + d.dx));
-            return endAngle  < 0 ?
-                "end" : "start";
-        })
-        .text(function(d) { return d.label; });
+    path.transition()
+        .duration(750)
+        .attrTween("d", function(d) {
+            var startAngle = angle(scaleX(d.x)),
+                endAngle = angle(scaleX(d.x + d.dx));
+
+            var interpolate = d3.interpolate(startAngle, endAngle);
+
+            return function(t) {
+                d.endAngle = interpolate(t);
+
+                return arc(d);
+            }
+        }).each("end", function(d, i) {
+            if (i == segments.length - 1) {
+                labelSegments();
+                drawTrends();
+            }
+        });
+
+    drawXAxis();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    function calcPoint(a, r) {
-        var x = 0 + r * Math.cos(a),
-            y = 0 + r * Math.sin(a);
-
-        return { 'x': x, 'y': y};
+    function labelSegments() {
+        arcs.append("svg:text")
+            .attr("transform", function(d) {
+                var c = arc.centroid(d),
+                    x = c[0],
+                    y = c[1],
+                    labelr = radius + 30,
+                // pythagorean theorem for hypotenuse
+                    h = Math.sqrt(x*x + y*y);
+                return "translate(" + (x/h * labelr) +  ',' + (y/h * labelr) +  ")";
+            })
+            .attr("dy", ".35em")
+            .attr("text-anchor", function(d) {
+                var endAngle = angle(scaleX(d.x + d.dx));
+                return endAngle  < 0 ?
+                    "end" : "start";
+            })
+            .text(function(d) { return d.label; });
     }
 
-    // calculate circles
-    var circles = _.flatten(_.map(segments, function(segment) {
-        return _.map(_.groupBy(segment.group,'radius'), function(trends, r) {
-            return _.map(trends, function(trend, i) {
-                var a = angle(scaleX(segment.x + step * (i+1))) - (Math.PI / 2);
-                return {
-                    'label': trend.label,
-                    'color': trend.color,
-                    'pos': calcPoint(a, r),
-                    'radius': 7
-                };
+    function drawTrends() {
+        // calculate circles
+        var circles = _.flatten(_.map(segments, function(segment) {
+            return _.map(_.groupBy(segment.group,'radius'), function(trends, r) {
+                return _.map(trends, function(trend, i) {
+                    var a = angle(scaleX(segment.x + step * (i+1))) - (Math.PI / 2);
+                    return {
+                        'label': trend.label,
+                        'color': trend.color,
+                        'pos': calcPoint(a, r),
+                        'radius': 7
+                    };
+                });
             });
-        });
-    }));
+        }));
 
-    // render circles
-    svg.selectAll("circle")
-        .data(circles)
-        .enter().append("circle")
-        .attr("cx", function(d) { return d.pos.x; })
-        .attr("cy", function(d) { return d.pos.y; })
-        .attr("r", function(d) { return d.radius; })
-        .attr("fill", function(d){ return d.color; });
+        // render circles
+        svg.selectAll("circle")
+            .data(circles)
+            .enter().append("circle")
+            .attr("cx", function(d) { return d.pos.x; })
+            .attr("cy", function(d) { return d.pos.y; })
+            .attr("r", function(d) { return d.radius; })
+            .attr("fill", function(d){ return d.color; });
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    }
 
-    // render right-half x axis
+    function drawXAxis() {
+        // render right-half x axis
 
-    var years = d3.scale.ordinal()
-        .domain([0,1,2,3,4])
-        .rangePoints([2000, 2015])
-        .range();
+        var years = d3.scale.ordinal()
+            .domain([0,1,2,3,4])
+            .rangePoints([2000, 2015])
+            .range();
 
-    years = _.map(years, Math.floor);
+        years = _.map(years, Math.floor);
 
-    var xAxisScale = d3.scale.ordinal()
-        .domain(years)
-        .rangePoints([0, radius]);
+        var xAxisScale = d3.scale.ordinal()
+            .domain(years)
+            .rangePoints([0, radius]);
 
-    var xAxis = d3.svg.axis()
-        .scale(xAxisScale)
-        .orient("bottom");
+        var xAxis = d3.svg.axis()
+            .scale(xAxisScale)
+            .orient("bottom");
 
-    svg.append("g")
-        .attr("class", "x axis")
-        .call(xAxis);
+        svg.append("g")
+            .attr("class", "x axis")
+            .call(xAxis);
 
-    // render left-half x axis
+        // render left-half x axis
 
-    var yearsRev = years.reverse();
-    yearsRev[yearsRev.length - 1] = ''; // quick-fix not to render minYear twice
+        var yearsRev = years.reverse();
+        yearsRev[yearsRev.length - 1] = ''; // quick-fix not to render minYear twice
 
-    var xAxisScaleRev = d3.scale.ordinal()
-        .domain(yearsRev)
-        .rangePoints([0, radius]);
+        var xAxisScaleRev = d3.scale.ordinal()
+            .domain(yearsRev)
+            .rangePoints([0, radius]);
 
-    var xAxisRev = d3.svg.axis()
-        .scale(xAxisScaleRev)
-        .orient("bottom");
+        var xAxisRev = d3.svg.axis()
+            .scale(xAxisScaleRev)
+            .orient("bottom");
 
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(-" + radius + ",0)")
-        .call(xAxisRev);
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(-" + radius + ",0)")
+            .call(xAxisRev);
+    }
 
 }
 
