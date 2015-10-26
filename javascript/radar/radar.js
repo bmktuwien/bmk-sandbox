@@ -3,17 +3,17 @@
  */
 
 var data = [
-    {radius: 200, segment: 'Segment A', label: 'Label 1', color: 'red'},
-    {radius: 374,  segment: 'Segment A', label: 'Label 2', color: 'red'},
-    {radius: 300, segment: 'Segment A', label: 'Label 3', color: 'yellow'},
-    {radius: 200, segment: 'Segment A', label: 'Label 4', color: 'red'},
-    {radius: 100, segment: 'Segment A', label: 'Label 5', color: 'blue'},
-    {radius: 280, segment: 'Segment B', label: 'Label 6', color: 'green'},
-    {radius: 120, segment: 'Segment C', label: 'Label 7', color: 'yellow'},
-    {radius: 240, segment: 'Segment C', label: 'Label 8', color: 'red'},
-    {radius: 120, segment: 'Segment C', label: 'Label 9', color: 'black'},
-    {radius: 270, segment: 'Segment D', label: 'Label 10', color: 'black'},
-    {radius: 270, segment: 'Segment D', label: 'Label 10', color: 'black'}
+    {radius: 200, segment: 'Segment A', label: 'Label 1', color: 'red', size: 4},
+    {radius: 374, segment: 'Segment A', label: 'Label 2', color: 'red', size: 3},
+    {radius: 300, segment: 'Segment A', label: 'Label 3', color: 'yellow', size: 7},
+    {radius: 200, segment: 'Segment A', label: 'Label 4', color: 'red', size: 10},
+    {radius: 100, segment: 'Segment A', label: 'Label 5', color: 'blue', size: 5},
+    {radius: 280, segment: 'Segment B', label: 'Label 6', color: 'green', size: 12},
+    {radius: 120, segment: 'Segment C', label: 'Label 7', color: 'yellow', size: 3},
+    {radius: 240, segment: 'Segment C', label: 'Label 8', color: 'red', size: 5},
+    {radius: 120, segment: 'Segment C', label: 'Label 9', color: 'black', size: 6},
+    {radius: 270, segment: 'Segment D', label: 'Label 10', color: 'black', size: 8},
+    {radius: 270, segment: 'Segment D', label: 'Label 10', color: 'black', size: 9}
 ];
 
 
@@ -148,7 +148,7 @@ var Radar = function (width, height) {
                             'label': trend.label,
                             'color': trend.color,
                             'pos': calcPoint(a, r),
-                            'radius': 7
+                            'radius': trend.size
                         };
                     });
                 });
@@ -158,12 +158,8 @@ var Radar = function (width, height) {
             var trends = svg.selectAll("circle")
                 .data(circles)
                 .enter().append("circle")
-                .attr("cx", function (d) {
-                    return 0;
-                })
-                .attr("cy", function (d) {
-                    return 0;
-                })
+                .attr("cx", 0)
+                .attr("cy", 0)
                 .attr("r", function (d) {
                     return d.radius;
                 })
