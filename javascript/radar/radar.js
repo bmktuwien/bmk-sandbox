@@ -12,7 +12,8 @@ var data = [
     {radius: 120, segment: 'Segment C', label: 'Label 7', color: 'yellow'},
     {radius: 240, segment: 'Segment C', label: 'Label 8', color: 'red'},
     {radius: 120, segment: 'Segment C', label: 'Label 9', color: 'black'},
-    {radius: 270, segment: 'Segment C', label: 'Label 10', color: 'black'}
+    {radius: 270, segment: 'Segment D', label: 'Label 10', color: 'black'},
+    {radius: 270, segment: 'Segment D', label: 'Label 10', color: 'black'}
 ];
 
 
@@ -59,7 +60,7 @@ function render(data) {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", "translate(" +  (width / 2) + "," +  (height / 2 + 10) + ")");
+        .attr("transform", "translate(" +  (width / 2) + "," +  (height / 2 + 50) + ")");
 
     var scaleX = d3.scale.linear().range([0, Math.PI]);
 
@@ -70,11 +71,31 @@ function render(data) {
         .outerRadius(radius);
 
     // render segments
-    svg.selectAll("path")
+    var arcs = svg.selectAll("path")
         .data(segments)
-        .enter().append("path")
+        .enter().append("g");
+
+    arcs.append("path")
         .style("fill", function(d) { return color(d.label); })
         .attr("d", arc);
+
+    arcs.append("svg:text")
+        .attr("transform", function(d) {
+            var c = arc.centroid(d),
+                x = c[0],
+                y = c[1],
+                labelr = radius + 30,
+                // pythagorean theorem for hypotenuse
+                h = Math.sqrt(x*x + y*y);
+            return "translate(" + (x/h * labelr) +  ',' + (y/h * labelr) +  ")";
+        })
+        .attr("dy", ".35em")
+        .attr("text-anchor", function(d) {
+            var endAngle = angle(scaleX(d.x + d.dx));
+            return endAngle  < 0 ?
+                "end" : "start";
+        })
+        .text(function(d) { return d.label; });
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
