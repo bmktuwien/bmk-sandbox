@@ -4,8 +4,8 @@
 
 var data = [
     {radius: 200, segment: 'Segment A', label: 'Label 1', color: 'red'},
-    {radius: 74,  segment: 'Segment A', label: 'Label 2', color: 'red'},
-    {radius: 200, segment: 'Segment A', label: 'Label 3', color: 'yellow'},
+    {radius: 374,  segment: 'Segment A', label: 'Label 2', color: 'red'},
+    {radius: 300, segment: 'Segment A', label: 'Label 3', color: 'yellow'},
     {radius: 200, segment: 'Segment A', label: 'Label 4', color: 'red'},
     {radius: 100, segment: 'Segment A', label: 'Label 5', color: 'blue'},
     {radius: 280, segment: 'Segment B', label: 'Label 6', color: 'green'},
@@ -20,8 +20,8 @@ var data = [
 
 
 function render(data) {
-    var width = 1024,
-        height = 768,
+    var width = 1224,
+        height = 968,
         radius = Math.min(width, height) / 2;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
