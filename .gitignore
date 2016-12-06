@@ -7,3 +7,8 @@
 dist
 cabal.sandbox.config
 .cabal-sandbox
+
+# java ignore files
+###############################################################################
+out
+*.class
