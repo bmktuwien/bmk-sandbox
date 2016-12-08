@@ -8,10 +8,12 @@ import java.util.List;
 public class Problem5 {
 
     public static void main(String[] args) {
-        List<List<Integer>> sol1 = solve(1, new int[]{1, 2, 3, 4});
-        int counter1 = solve2(1, new int[]{1, 2, 3, 4});
-        prinSolution(sol1);
-        System.out.println("Number of solutions: " + counter1);
+        //List<List<Integer>> sol1 = solve(120, new int[]{1, 2, 3, 4});
+        //int counter1 = solve2(1000, new int[]{1, 2, 3, 4});
+        int counter2 = solve3(1000, new int[]{1, 2, 3, 4});
+        //printSolution(sol1);
+        //System.out.println("Number of solutions: " + counter1);
+        System.out.println("Number of solutions: " + counter2);
     }
 
     public static List<List<Integer>> solve(int amount, int[] coins) {
@@ -73,7 +75,21 @@ public class Problem5 {
         return sol;
     }
 
-    public static void prinSolution(List<List<Integer>> solution) {
+    // dynamic programming
+    public static int solve3(int amount, int[] coins) {
+        int[] possibilities = new int[amount+1];
+        possibilities[0] = 1;
+
+        for (int coin : coins) {
+            for (int a = coin; a <= amount; a++) {
+                possibilities[a] += possibilities[a - coin];
+            }
+        }
+
+        return possibilities[amount];
+    }
+
+    public static void printSolution(List<List<Integer>> solution) {
         for (List<Integer> l : solution) {
             for (Integer i : l) {
                 System.out.print(i + " ");
