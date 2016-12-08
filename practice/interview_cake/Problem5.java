@@ -8,8 +8,8 @@ import java.util.List;
 public class Problem5 {
 
     public static void main(String[] args) {
-        List<List<Integer>> sol1 = solve(21, new int[]{1, 2, 3, 4});
-        int counter1 = solve2(21, new int[]{1, 2, 3, 4});
+        List<List<Integer>> sol1 = solve(1, new int[]{1, 2, 3, 4});
+        int counter1 = solve2(1, new int[]{1, 2, 3, 4});
         prinSolution(sol1);
         System.out.println("Number of solutions: " + counter1);
     }
@@ -42,6 +42,10 @@ public class Problem5 {
     }
 
     public static int solve2(int amount, int[] coins) {
+        if (amount == 0) {
+            return 0;
+        }
+
         List<Integer> restAmounts = new ArrayList<>();
         restAmounts.add(amount);
 
