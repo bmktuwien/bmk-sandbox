@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -9,10 +10,10 @@ public class Problem5 {
 
     public static void main(String[] args) {
         //List<List<Integer>> sol1 = solve(120, new int[]{1, 2, 3, 4});
-        //int counter1 = solve2(1000, new int[]{1, 2, 3, 4});
-        int counter2 = solve3(1000, new int[]{1, 2, 3, 4});
+        int counter1 = solve2(1000000, new int[]{100, 200, 300, 400, 500});
+        int counter2 = solve3(1000000, new int[]{100, 200, 300, 400, 500});
         //printSolution(sol1);
-        //System.out.println("Number of solutions: " + counter1);
+        System.out.println("Number of solutions: " + counter1);
         System.out.println("Number of solutions: " + counter2);
     }
 
@@ -48,44 +49,46 @@ public class Problem5 {
             return 0;
         }
 
-        List<Integer> restAmounts = new ArrayList<>();
-        restAmounts.add(amount);
+        HashMap<Integer, Integer> restAmounts = new HashMap<>();
+        restAmounts.put(amount, 1);
+        int itCounter = 0;
 
         for (int coin : coins) {
-            List<Integer> newRestAmounts = new ArrayList<>();
+            HashMap<Integer, Integer> newRestAmounts = new HashMap<>();
 
-            for (int restAmount : restAmounts) {
-                int counter = restAmount / coin;
+            for (int restAmount : restAmounts.keySet()) {
+                int counter = restAmounts.get(restAmount);
 
-                for (int i = 0; i <= counter; i++) {
-                    newRestAmounts.add(restAmount - (i * coin));
+                int k = restAmount / coin;
+                for (int i = 0; i <= k; i++) {
+                    int a = restAmount - i * coin;
+                    int c = newRestAmounts.getOrDefault(a, 0);
+                    newRestAmounts.put(a, c + counter);
+                    itCounter++;
                 }
             }
 
             restAmounts = newRestAmounts;
         }
 
-        int sol = 0;
-        for (int restAmount : restAmounts) {
-            if (restAmount == 0) {
-                sol++;
-            }
-        }
-
-        return sol;
+        System.out.println("Solve2 itCounter: " + itCounter);
+        return restAmounts.get(0);
     }
 
     // dynamic programming
     public static int solve3(int amount, int[] coins) {
         int[] possibilities = new int[amount+1];
         possibilities[0] = 1;
+        int itCounter = 0;
 
         for (int coin : coins) {
             for (int a = coin; a <= amount; a++) {
                 possibilities[a] += possibilities[a - coin];
+                itCounter++;
             }
         }
 
+        System.out.println("Solve3 itCounter: " + itCounter);
         return possibilities[amount];
     }
 
