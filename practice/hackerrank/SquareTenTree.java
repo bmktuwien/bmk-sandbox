@@ -44,18 +44,29 @@ public class SquareTenTree {
             lLevels[0] =  rDigits[0] - lDigits[0] + 1;
         }
 
+        int level = 1;
+        long factor = 1;
+
         for (int i = 1; i <= k; i++) {
             if (i == k) {
-                lLevels[i] = rDigits[i] - lDigits[i] - c;
+                lLevels[level] += (rDigits[i] - lDigits[i] - c) * factor;
             } else {
                 if (lDigits[i] + c != 0) {
-                    lLevels[i] =  10 - lDigits[i] - c;
+                    lLevels[level] +=  (10 - lDigits[i] - c) * factor;
                     c = 1;
                 }
 
                 if (rDigits[i] != 0) {
-                    rLevels[i] = rDigits[i];
+                    rLevels[level] += rDigits[i] * factor;
                 }
+            }
+
+            // if next index is power of 2, then reset factor and increase level
+            if (isPowerOfTwo(i + 1)) {
+                level++;
+                factor = 1;
+            } else {
+                factor *= 10;
             }
         }
 
@@ -110,5 +121,9 @@ public class SquareTenTree {
         Collections.reverse(digits);
 
         return digits.stream().mapToInt(i->i).toArray();
+    }
+
+    public static boolean isPowerOfTwo(int x) {
+        return (x & (x - 1)) == 0;
     }
 }
