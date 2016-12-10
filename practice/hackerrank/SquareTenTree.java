@@ -31,13 +31,15 @@ public class SquareTenTree {
         int c = 0;
         if (k > 0) {
             if (lDigits[0] > 1) {
-                lLevels[0] = 10 - lDigits[0];
+                lLevels[0] = 11 - lDigits[0];
                 c = 1;
             } else {
                 lLevels[0] = 1 - lDigits[0];
             }
 
-            rLevels[0] =  rDigits[0];
+            if (rDigits[0] != 0) {
+                rLevels[0] =  rDigits[0];
+            }
         } else {
             lLevels[0] =  rDigits[0] - lDigits[0] + 1;
         }
@@ -59,9 +61,12 @@ public class SquareTenTree {
 
         // merge
         for (int i = lLevels.length - 1; i > 0; i--) {
-            if (rLevels[i] != 0 && lLevels[i] != 0) {
-                lLevels[i] += rLevels[i];
-                rLevels[i] = 0;
+            if (rLevels[i] != 0 || lLevels[i] != 0) {
+                if (rLevels[i] != 0 && lLevels[i] != 0) {
+                    lLevels[i] += rLevels[i];
+                    rLevels[i] = 0;
+                }
+
                 break;
             }
         }
