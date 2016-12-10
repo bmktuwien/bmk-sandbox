@@ -18,8 +18,8 @@ public class SquareTenTree {
     }
 
     public static void findMinDecomposition(int[] lDigits, int[] rDigits) {
-        BigInteger[] lLevels = new BigInteger[lDigits.length];
-        BigInteger[] rLevels = new BigInteger[rDigits.length];
+        StringBuffer[] lLevels = new StringBuffer[lDigits.length];
+        StringBuffer[] rLevels = new StringBuffer[rDigits.length];
 
         int k = -1;
         for (int i = lDigits.length - 1; i > 0; i--) {
@@ -31,86 +31,82 @@ public class SquareTenTree {
 
         // initialize
         for (int i = 0; i < lLevels.length; i++) {
-            lLevels[i] = BigInteger.ZERO;
-            rLevels[i] = BigInteger.ZERO;
+            lLevels[i] = new StringBuffer();
+            rLevels[i] = new StringBuffer();
         }
 
         int c = 0;
         if (k > 0) {
             if (lDigits[0] > 1) {
-                lLevels[0] = BigInteger.valueOf(11 - lDigits[0]);
+                lLevels[0].append(11 - lDigits[0]);
                 c = 1;
-            } else {
-                lLevels[0] = BigInteger.valueOf(1 - lDigits[0]);
+            } else if (lDigits[0] == 0){
+                lLevels[0].append(1);
             }
 
-            if (rDigits[0] != 0) {
-                rLevels[0] =  BigInteger.valueOf(rDigits[0]);
-            }
+            rLevels[0].append(rDigits[0]);
         } else {
-            lLevels[0] =  BigInteger.valueOf(rDigits[0] - lDigits[0] + 1);
+            lLevels[0].append(rDigits[0] - lDigits[0] + 1);
         }
 
         int level = 1;
-        BigInteger factor = BigInteger.ONE;
-
         for (int i = 1; i <= k; i++) {
             if (i == k) {
-                lLevels[level] = lLevels[level].add(BigInteger.valueOf(rDigits[i] - lDigits[i] - c).multiply(factor));
+                lLevels[level].append((rDigits[i] - lDigits[i] - c));
             } else {
-                if (lDigits[i] + c != 0) {
-                    lLevels[level] =  lLevels[level].add(BigInteger.valueOf(10 - lDigits[i] - c).multiply(factor));
-                    c = 1;
-                }
+                lLevels[level].append((10 - lDigits[i] - c) % 10);
+                rLevels[level].append(rDigits[i]);
 
-                if (rDigits[i] != 0) {
-                    rLevels[level] = rLevels[level].add(BigInteger.valueOf(rDigits[i]).multiply(factor));
+                if (lDigits[i] + c != 0) {
+                    c = 1;
                 }
             }
 
             // if next index is power of 2, then reset factor and increase level
             if (isPowerOfTwo(i + 1)) {
                 level++;
-                factor = BigInteger.ONE;
-            } else {
-                factor = factor.multiply(BigInteger.TEN);
             }
         }
 
         // post processing
-        // merge
-        for (int i = lLevels.length - 1; i >= 0; i--) {
-            if (!rLevels[i].equals(BigInteger.ZERO) || !lLevels[i].equals(BigInteger.ZERO)) {
-                if (!rLevels[i].equals(BigInteger.ZERO) && !lLevels[i].equals(BigInteger.ZERO)) {
-                    lLevels[i] = lLevels[i].add(rLevels[i]);
-                    rLevels[i] = BigInteger.ZERO;
-                }
+        boolean merged = false;
+        for (int i = level; i >= 0; i--) {
+            lLevels[i].reverse();
+            rLevels[i].reverse();
 
-                break;
+            if (!merged && (!isZero(rLevels[i]) || !isZero(lLevels[i]))) {
+                if (!isZero(rLevels[i]) && !isZero(lLevels[i])) {
+                    BigInteger b1 = new BigInteger(lLevels[i].toString());
+                    BigInteger b2 = new BigInteger(rLevels[i].toString());
+
+                    lLevels[i] = new StringBuffer(b1.add(b2).toString());
+                    rLevels[i] = new StringBuffer();
+                    merged = true;
+                }
             }
         }
 
         int counter = 0;
-        for (int i = 0; i < lLevels.length; i++) {
-            if (!lLevels[i].equals(BigInteger.ZERO)) {
+        for (int i = 0; i <= level; i++) {
+            if (!isZero(lLevels[i])) {
                 counter++;
             }
 
-            if (!rLevels[i].equals(BigInteger.ZERO)) {
+            if (!isZero(rLevels[i])) {
                 counter++;
             }
         }
 
         System.out.println(counter);
 
-        for (int i = 0; i < lLevels.length; i++) {
-            if (!lLevels[i].equals(BigInteger.ZERO)) {
+        for (int i = 0; i <= level; i++) {
+            if (!isZero(lLevels[i])) {
                 System.out.println(i + " " + lLevels[i]);
             }
         }
 
-        for (int i = rLevels.length - 1; i >= 0; i--) {
-            if (!rLevels[i].equals(BigInteger.ZERO)) {
+        for (int i = level; i >= 0; i--) {
+            if (!isZero(rLevels[i])) {
                 System.out.println(i + " " + rLevels[i]);
             }
         }
@@ -133,4 +129,15 @@ public class SquareTenTree {
     public static boolean isPowerOfTwo(int x) {
         return (x & (x - 1)) == 0;
     }
+
+    public static boolean isZero(StringBuffer s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) != '0') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
