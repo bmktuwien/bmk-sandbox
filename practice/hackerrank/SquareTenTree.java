@@ -57,6 +57,15 @@ public class SquareTenTree {
             }
         }
 
+        // merge
+        for (int i = lLevels.length - 1; i > 0; i--) {
+            if (rLevels[i] != 0 && lLevels[i] != 0) {
+                lLevels[i] += rLevels[i];
+                rLevels[i] = 0;
+                break;
+            }
+        }
+
         int counter = 0;
         for (int i = 0; i < lLevels.length; i++) {
             if (lLevels[i] != 0) {
