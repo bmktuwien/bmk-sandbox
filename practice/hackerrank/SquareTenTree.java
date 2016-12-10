@@ -70,11 +70,16 @@ public class SquareTenTree {
             }
         }
 
+        level = Math.min(level, lLevels.length - 1);
+
         // post processing
         boolean merged = false;
         for (int i = level; i >= 0; i--) {
             lLevels[i].reverse();
             rLevels[i].reverse();
+
+            deleteLeadingZeros(lLevels[i]);
+            deleteLeadingZeros(rLevels[i]);
 
             if (!merged && (!isZero(rLevels[i]) || !isZero(lLevels[i]))) {
                 if (!isZero(rLevels[i]) && !isZero(lLevels[i])) {
@@ -138,4 +143,9 @@ public class SquareTenTree {
 
     }
 
+    public static void deleteLeadingZeros(StringBuffer s) {
+        while (s.length() > 0 && s.charAt(0) == '0') {
+            s.deleteCharAt(0);
+        }
+    }
 }
