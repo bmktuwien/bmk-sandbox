@@ -52,7 +52,9 @@ public class SquareTenTree {
         int level = 1;
         for (int i = 1; i <= k; i++) {
             if (i == k) {
-                lLevels[level].append((rDigits[i] - lDigits[i] - c));
+                if (rDigits[i] - lDigits[i] - c != 0) {
+                    lLevels[level].append((rDigits[i] - lDigits[i] - c));
+                }
             } else {
                 lLevels[level].append((10 - lDigits[i] - c) % 10);
                 rLevels[level].append(rDigits[i]);
@@ -81,8 +83,9 @@ public class SquareTenTree {
 
                     lLevels[i] = new StringBuffer(b1.add(b2).toString());
                     rLevels[i] = new StringBuffer();
-                    merged = true;
                 }
+
+                merged = true;
             }
         }
 
