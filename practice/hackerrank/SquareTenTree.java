@@ -18,6 +18,7 @@ public class SquareTenTree {
     }
 
     public static void findMinDecomposition(int[] lDigits, int[] rDigits) {
+        //TODO: calculate correct level!!!
         StringBuilder[] lLevels = new StringBuilder[lDigits.length];
         StringBuilder[] rLevels = new StringBuilder[rDigits.length];
 
@@ -83,14 +84,15 @@ public class SquareTenTree {
 
                 lTemp = 0;
                 rTemp = 0;
-                level++;
+
+                if (i + 1 <= k) {
+                    level++;
+                }
             } else if (i == k) {
                 lLevels[level] = new StringBuilder(lLevels[level].substring(0, lTemp));
                 rLevels[level] = new StringBuilder(rLevels[level].substring(0, rTemp));
             }
         }
-
-        level = Math.min(level, lLevels.length - 1);
 
         // post processing
         boolean merged = false;
@@ -155,12 +157,6 @@ public class SquareTenTree {
     public static boolean isZero(StringBuilder s) {
         return s.length() == 0 || s.charAt(0) == '0';
 
-    }
-
-    public static void deleteLeadingZeros(StringBuilder s) {
-        while (s.length() > 0 && s.charAt(0) == '0') {
-            s.deleteCharAt(0);
-        }
     }
 
     public static StringBuilder add(StringBuilder s1, StringBuilder s2) {
