@@ -83,10 +83,7 @@ public class SquareTenTree {
 
             if (!merged && (!isZero(rLevels[i]) || !isZero(lLevels[i]))) {
                 if (!isZero(rLevels[i]) && !isZero(lLevels[i])) {
-                    BigInteger b1 = new BigInteger(lLevels[i].toString());
-                    BigInteger b2 = new BigInteger(rLevels[i].toString());
-
-                    lLevels[i] = new StringBuffer(b1.add(b2).toString());
+                    lLevels[i] = add(lLevels[i], rLevels[i]);
                     rLevels[i] = new StringBuffer();
                 }
 
@@ -147,5 +144,31 @@ public class SquareTenTree {
         while (s.length() > 0 && s.charAt(0) == '0') {
             s.deleteCharAt(0);
         }
+    }
+
+    public static StringBuffer add(StringBuffer s1, StringBuffer s2) {
+        int i = s1.length() - 1;
+        int j = s2.length() - 1;
+
+        StringBuffer result = new StringBuffer();
+
+        int c = 0;
+        while (i >= 0 || j >= 0) {
+            int d1 = i >= 0 ? s1.charAt(i) - '0' : 0;
+            int d2 = j >= 0 ? s2.charAt(j) - '0' : 0;
+            int s = d1 + d2 + c;
+
+            result.append(s % 10);
+            c = s / 10;
+
+            i--;
+            j--;
+        }
+
+        if (c != 0) {
+            result.append(c);
+        }
+
+        return result.reverse();
     }
 }
