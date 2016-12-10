@@ -134,13 +134,8 @@ public class SquareTenTree {
     }
 
     public static boolean isZero(StringBuffer s) {
-        for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) != '0') {
-                return false;
-            }
-        }
+        return s.length() == 0 || s.charAt(0) == '0';
 
-        return true;
     }
 
 }
