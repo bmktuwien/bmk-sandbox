@@ -59,8 +59,9 @@ public class SquareTenTree {
             }
         }
 
+        // post processing
         // merge
-        for (int i = lLevels.length - 1; i > 0; i--) {
+        for (int i = lLevels.length - 1; i >= 0; i--) {
             if (rLevels[i] != 0 || lLevels[i] != 0) {
                 if (rLevels[i] != 0 && lLevels[i] != 0) {
                     lLevels[i] += rLevels[i];
