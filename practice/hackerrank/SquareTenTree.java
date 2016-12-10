@@ -18,8 +18,8 @@ public class SquareTenTree {
     }
 
     public static void findMinDecomposition(int[] lDigits, int[] rDigits) {
-        StringBuffer[] lLevels = new StringBuffer[lDigits.length];
-        StringBuffer[] rLevels = new StringBuffer[rDigits.length];
+        StringBuilder[] lLevels = new StringBuilder[lDigits.length];
+        StringBuilder[] rLevels = new StringBuilder[rDigits.length];
 
         int k = -1;
         for (int i = lDigits.length - 1; i > 0; i--) {
@@ -31,8 +31,8 @@ public class SquareTenTree {
 
         // initialize
         for (int i = 0; i < lLevels.length; i++) {
-            lLevels[i] = new StringBuffer();
-            rLevels[i] = new StringBuffer();
+            lLevels[i] = new StringBuilder();
+            rLevels[i] = new StringBuilder();
         }
 
         int c = 0;
@@ -50,14 +50,26 @@ public class SquareTenTree {
         }
 
         int level = 1;
+        int lTemp = 0;
+        int rTemp = 0;
+
         for (int i = 1; i <= k; i++) {
             if (i == k) {
                 if (rDigits[i] - lDigits[i] - c != 0) {
                     lLevels[level].append((rDigits[i] - lDigits[i] - c));
+                    lTemp = lLevels[level].length();
                 }
             } else {
                 lLevels[level].append((10 - lDigits[i] - c) % 10);
                 rLevels[level].append(rDigits[i]);
+
+                if ((10 - lDigits[i] - c) % 10 != 0) {
+                    lTemp = lLevels[level].length();
+                }
+
+                if (rDigits[i] != 0) {
+                    rTemp = rLevels[level].length();
+                }
 
                 if (lDigits[i] + c != 0) {
                     c = 1;
@@ -66,7 +78,15 @@ public class SquareTenTree {
 
             // if next index is power of 2, then reset factor and increase level
             if (isPowerOfTwo(i + 1)) {
+                lLevels[level] = new StringBuilder(lLevels[level].substring(0, lTemp));
+                rLevels[level] = new StringBuilder(rLevels[level].substring(0, rTemp));
+
+                lTemp = 0;
+                rTemp = 0;
                 level++;
+            } else if (i == k) {
+                lLevels[level] = new StringBuilder(lLevels[level].substring(0, lTemp));
+                rLevels[level] = new StringBuilder(rLevels[level].substring(0, rTemp));
             }
         }
 
@@ -78,13 +98,10 @@ public class SquareTenTree {
             lLevels[i].reverse();
             rLevels[i].reverse();
 
-            deleteLeadingZeros(lLevels[i]);
-            deleteLeadingZeros(rLevels[i]);
-
             if (!merged && (!isZero(rLevels[i]) || !isZero(lLevels[i]))) {
                 if (!isZero(rLevels[i]) && !isZero(lLevels[i])) {
                     lLevels[i] = add(lLevels[i], rLevels[i]);
-                    rLevels[i] = new StringBuffer();
+                    rLevels[i] = new StringBuilder();
                 }
 
                 merged = true;
@@ -135,22 +152,22 @@ public class SquareTenTree {
         return (x & (x - 1)) == 0;
     }
 
-    public static boolean isZero(StringBuffer s) {
+    public static boolean isZero(StringBuilder s) {
         return s.length() == 0 || s.charAt(0) == '0';
 
     }
 
-    public static void deleteLeadingZeros(StringBuffer s) {
+    public static void deleteLeadingZeros(StringBuilder s) {
         while (s.length() > 0 && s.charAt(0) == '0') {
             s.deleteCharAt(0);
         }
     }
 
-    public static StringBuffer add(StringBuffer s1, StringBuffer s2) {
+    public static StringBuilder add(StringBuilder s1, StringBuilder s2) {
         int i = s1.length() - 1;
         int j = s2.length() - 1;
 
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         int c = 0;
         while (i >= 0 || j >= 0) {
