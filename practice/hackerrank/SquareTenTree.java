@@ -1,3 +1,4 @@
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -17,8 +18,8 @@ public class SquareTenTree {
     }
 
     public static void findMinDecomposition(int[] lDigits, int[] rDigits) {
-        int[] lLevels = new int[lDigits.length];
-        int[] rLevels = new int[rDigits.length];
+        BigInteger[] lLevels = new BigInteger[lDigits.length];
+        BigInteger[] rLevels = new BigInteger[rDigits.length];
 
         int k = -1;
         for (int i = lDigits.length - 1; i > 0; i--) {
@@ -28,55 +29,61 @@ public class SquareTenTree {
             }
         }
 
+        // initialize
+        for (int i = 0; i < lLevels.length; i++) {
+            lLevels[i] = BigInteger.ZERO;
+            rLevels[i] = BigInteger.ZERO;
+        }
+
         int c = 0;
         if (k > 0) {
             if (lDigits[0] > 1) {
-                lLevels[0] = 11 - lDigits[0];
+                lLevels[0] = BigInteger.valueOf(11 - lDigits[0]);
                 c = 1;
             } else {
-                lLevels[0] = 1 - lDigits[0];
+                lLevels[0] = BigInteger.valueOf(1 - lDigits[0]);
             }
 
             if (rDigits[0] != 0) {
-                rLevels[0] =  rDigits[0];
+                rLevels[0] =  BigInteger.valueOf(rDigits[0]);
             }
         } else {
-            lLevels[0] =  rDigits[0] - lDigits[0] + 1;
+            lLevels[0] =  BigInteger.valueOf(rDigits[0] - lDigits[0] + 1);
         }
 
         int level = 1;
-        long factor = 1;
+        BigInteger factor = BigInteger.ONE;
 
         for (int i = 1; i <= k; i++) {
             if (i == k) {
-                lLevels[level] += (rDigits[i] - lDigits[i] - c) * factor;
+                lLevels[level] = lLevels[level].add(BigInteger.valueOf(rDigits[i] - lDigits[i] - c).multiply(factor));
             } else {
                 if (lDigits[i] + c != 0) {
-                    lLevels[level] +=  (10 - lDigits[i] - c) * factor;
+                    lLevels[level] =  lLevels[level].add(BigInteger.valueOf(10 - lDigits[i] - c).multiply(factor));
                     c = 1;
                 }
 
                 if (rDigits[i] != 0) {
-                    rLevels[level] += rDigits[i] * factor;
+                    rLevels[level] = rLevels[level].add(BigInteger.valueOf(rDigits[i]).multiply(factor));
                 }
             }
 
             // if next index is power of 2, then reset factor and increase level
             if (isPowerOfTwo(i + 1)) {
                 level++;
-                factor = 1;
+                factor = BigInteger.ONE;
             } else {
-                factor *= 10;
+                factor = factor.multiply(BigInteger.TEN);
             }
         }
 
         // post processing
         // merge
         for (int i = lLevels.length - 1; i >= 0; i--) {
-            if (rLevels[i] != 0 || lLevels[i] != 0) {
-                if (rLevels[i] != 0 && lLevels[i] != 0) {
-                    lLevels[i] += rLevels[i];
-                    rLevels[i] = 0;
+            if (!rLevels[i].equals(BigInteger.ZERO) || !lLevels[i].equals(BigInteger.ZERO)) {
+                if (!rLevels[i].equals(BigInteger.ZERO) && !lLevels[i].equals(BigInteger.ZERO)) {
+                    lLevels[i] = lLevels[i].add(rLevels[i]);
+                    rLevels[i] = BigInteger.ZERO;
                 }
 
                 break;
@@ -85,11 +92,11 @@ public class SquareTenTree {
 
         int counter = 0;
         for (int i = 0; i < lLevels.length; i++) {
-            if (lLevels[i] != 0) {
+            if (!lLevels[i].equals(BigInteger.ZERO)) {
                 counter++;
             }
 
-            if (rLevels[i] != 0) {
+            if (!rLevels[i].equals(BigInteger.ZERO)) {
                 counter++;
             }
         }
@@ -97,13 +104,13 @@ public class SquareTenTree {
         System.out.println(counter);
 
         for (int i = 0; i < lLevels.length; i++) {
-            if (lLevels[i] != 0) {
+            if (!lLevels[i].equals(BigInteger.ZERO)) {
                 System.out.println(i + " " + lLevels[i]);
             }
         }
 
         for (int i = rLevels.length - 1; i >= 0; i--) {
-            if (rLevels[i] != 0) {
+            if (!rLevels[i].equals(BigInteger.ZERO)) {
                 System.out.println(i + " " + rLevels[i]);
             }
         }
