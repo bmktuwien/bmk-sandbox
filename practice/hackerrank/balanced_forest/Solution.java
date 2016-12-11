@@ -21,6 +21,7 @@ public class Solution {
 
     public static long solve() {
         long result = -1;
+        System.out.println(edges.length);
 
         // brute force all edge pairs
         for (int i = 0; i < edges.length; i++) {
@@ -31,7 +32,7 @@ public class Solution {
                 Edge e2 = edges[j];
 
                 // first cut
-                Node child = nodes[e1.yId];
+                Node child = nodes[e1.xId].sum < nodes[e1.yId].sum ? nodes[e1.xId] : nodes[e1.yId];
                 long sum1 = child.sum;
 
                 // update sums after first cut
@@ -42,7 +43,7 @@ public class Solution {
                 }
 
                 // second cut
-                Node child2 = nodes[e2.yId];
+                Node child2 = nodes[e2.xId].sum < nodes[e2.yId].sum ? nodes[e2.xId] : nodes[e2.yId];
                 long sum2 = update.containsKey(child2.id) ? update.get(child2.id) : child2.sum;
 
                 // calculate final sum
@@ -121,7 +122,24 @@ public class Solution {
 
         public void addParent(Node parent) {
             if (this.parent != null) {
-                throw new RuntimeException("Panic: parent was already set!!!");
+                //rewire old parents to be the children
+                List<Node> stack = new ArrayList<>();
+
+                Node p = this;
+                while (p != null) {
+                    stack.add(p);
+                    p = p.parent;
+                }
+
+                long sum = 0;
+                for (int i = stack.size() - 1; i > 0; i--) {
+                    p = stack.get(i);
+                    sum += p.data;
+                    p.sum = sum;
+                    p.parent = stack.get(i - 1);
+                }
+
+                this.sum += sum;
             }
 
             this.parent = parent;
