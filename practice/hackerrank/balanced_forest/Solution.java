@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by bmk on 12/11/16.
@@ -12,12 +10,71 @@ public class Solution {
     private static Edge[] edges;
 
     public static void main(String[] args) {
-        readInput();
-
-        System.out.println("done");
+        readQuery();
+        long result = solve();
+        System.out.println(result);
     }
 
-    public static void readInput() {
+    public static long solve() {
+        long result = -1;
+
+        // brute force all edge pairs
+        for (int i = 0; i < edges.length; i++) {
+            for (int j = i + 1; j < edges.length; j++) {
+                Map<Integer, Long> update = new HashMap<>();
+
+                Edge e1 = edges[i];
+                Edge e2 = edges[j];
+
+                // first cut
+                Node child = nodes[e1.yId];
+                long sum1 = child.sum;
+
+                // update sums after first cut
+                Node parent = child.parent;
+                while (parent != null) {
+                    update.put(parent.id, parent.sum - sum1);
+                    parent = parent.parent;
+                }
+
+                // second cut
+                Node child2 = nodes[e2.yId];
+                long sum2 = update.containsKey(child2.id) ? update.get(child2.id) : child2.sum;
+
+                // calculate final sum
+                parent = child2.parent;
+                while (parent.parent != null) {
+                    parent = parent.parent;
+                }
+
+                long sum3 = update.containsKey(parent.id) ? update.get(parent.id) - sum2 : parent.sum - sum2;
+
+                // calculate minimum cw
+                long min = Long.MAX_VALUE;
+                if (sum1 == sum2 && sum3 < sum1 && sum1 - sum3 < min) {
+                    min = sum1 - sum3;
+                }
+
+                if (sum1 == sum3 && sum2 < sum1 && sum1 - sum2 < min) {
+                    min = sum1 - sum2;
+                }
+
+                if (sum2 == sum3 && sum1 < sum2 && sum2 - sum1 < min) {
+                    min = sum2 - sum1;
+                }
+
+                if (min != Long.MAX_VALUE) {
+                    if (result < 0 || min < result) {
+                        result = min;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static void readQuery() {
         int n = scanner.nextInt();
 
         // read nodes
