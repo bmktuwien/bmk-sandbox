@@ -14,8 +14,8 @@ public class Solution {
 
         for (int i = 0; i < q; i++) {
             readQuery();
-            long result = solve();
-            System.out.println(result);
+            //long result = solve();
+            //System.out.println(result);
         }
     }
 
@@ -26,33 +26,34 @@ public class Solution {
         // brute force all edge pairs
         for (int i = 0; i < edges.length; i++) {
             for (int j = i + 1; j < edges.length; j++) {
-                Map<Integer, Long> update = new HashMap<>();
-
                 Edge e1 = edges[i];
                 Edge e2 = edges[j];
 
-                // first cut
-                Node child = nodes[e1.xId].sum < nodes[e1.yId].sum ? nodes[e1.xId] : nodes[e1.yId];
+                Node child = nodes[e1.xId].parent == nodes[e1.yId] ? nodes[e1.xId] : nodes[e1.yId];
+                Node child2 = nodes[e2.xId].parent == nodes[e2.yId] ? nodes[e2.xId] : nodes[e2.yId];
+
+                // make sure child is at bottom
+                if (child2.sum < child.sum) {
+                    Node tmp = child;
+                    child = child2;
+                    child2 = tmp;
+                }
+
                 long sum1 = child.sum;
+                long sum2 = child2.sum;
+                long sum3 = 0;
 
-                // update sums after first cut
-                Node parent = child.parent;
-                while (parent != null) {
-                    update.put(parent.id, parent.sum - sum1);
-                    parent = parent.parent;
+                Node p = child.parent;
+                while (p.parent != null) {
+                    if (p.parent == child2) {
+                        sum2 -= sum1;
+                        sum3 -= sum1;
+                    }
+
+                    p = p.parent;
                 }
 
-                // second cut
-                Node child2 = nodes[e2.xId].sum < nodes[e2.yId].sum ? nodes[e2.xId] : nodes[e2.yId];
-                long sum2 = update.containsKey(child2.id) ? update.get(child2.id) : child2.sum;
-
-                // calculate final sum
-                parent = child2.parent;
-                while (parent.parent != null) {
-                    parent = parent.parent;
-                }
-
-                long sum3 = update.containsKey(parent.id) ? update.get(parent.id) - sum2 : parent.sum - sum2;
+                sum3 += p.sum;
 
                 // calculate minimum cw
                 long min = Long.MAX_VALUE;
@@ -68,9 +69,12 @@ public class Solution {
                     min = sum2 - sum1;
                 }
 
+                System.out.println(sum1 + " " + sum2 + " " + sum3 + " " + child.sum + " " + child2.sum + " " + p.sum);
+
                 if (min != Long.MAX_VALUE) {
                     if (result < 0 || min < result) {
                         result = min;
+                        System.out.println(result);
                     }
                 }
             }
@@ -85,7 +89,7 @@ public class Solution {
         // read nodes
         nodes = new Node[n];
         for (int i = 0; i < n; i++) {
-            int c = scanner.nextInt();
+            long c = scanner.nextLong();
             nodes[i] = new Node(i, c);
         }
 
@@ -109,11 +113,11 @@ public class Solution {
 
     public static class Node {
         final int id;
-        final int data;
+        final long data;
         long sum;
         Node parent;
 
-        public Node(int id, int data) {
+        public Node(int id, long data) {
             this.id = id;
             this.data = data;
             this.sum = data;
@@ -129,23 +133,37 @@ public class Solution {
                 while (p != null) {
                     stack.add(p);
                     p = p.parent;
+
+                    if (p != null) {
+                        if (p.sum < this.sum) {
+                            throw new RuntimeException(p.sum + " " + this.sum);
+                        }
+
+                        p.sum -= this.sum;
+                    }
                 }
 
-                long sum = 0;
                 for (int i = stack.size() - 1; i > 0; i--) {
                     p = stack.get(i);
-                    sum += p.data;
-                    p.sum = sum;
                     p.parent = stack.get(i - 1);
+                    p.parent.sum += p.sum;
                 }
 
-                this.sum += sum;
+                this.sum += this.parent.sum;
+
+                if (this.sum < 0) {
+                    throw new RuntimeException("Panic " + this.sum + " " + this.parent.sum);
+                }
             }
 
             this.parent = parent;
 
             while (parent != null) {
-                parent.sum += sum;
+                parent.sum += this.sum;
+                if (parent.sum < 0) {
+                    throw new RuntimeException("Panic " + sum);
+                }
+
                 parent = parent.parent;
             }
         }
