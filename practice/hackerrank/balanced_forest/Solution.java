@@ -14,14 +14,13 @@ public class Solution {
 
         for (int i = 0; i < q; i++) {
             readQuery();
-            //long result = solve();
-            //System.out.println(result);
+            long result = solve();
+            System.out.println(result);
         }
     }
 
     public static long solve() {
         long result = -1;
-        System.out.println(edges.length);
 
         // brute force all edge pairs
         for (int i = 0; i < edges.length; i++) {
@@ -69,12 +68,10 @@ public class Solution {
                     min = sum2 - sum1;
                 }
 
-                System.out.println(sum1 + " " + sum2 + " " + sum3 + " " + child.sum + " " + child2.sum + " " + p.sum);
-
+                System.out.println(min);
                 if (min != Long.MAX_VALUE) {
                     if (result < 0 || min < result) {
                         result = min;
-                        System.out.println(result);
                     }
                 }
             }
@@ -133,26 +130,17 @@ public class Solution {
                 while (p != null) {
                     stack.add(p);
                     p = p.parent;
-
-                    if (p != null) {
-                        if (p.sum < this.sum) {
-                            throw new RuntimeException(p.sum + " " + this.sum);
-                        }
-
-                        p.sum -= this.sum;
-                    }
                 }
 
                 for (int i = stack.size() - 1; i > 0; i--) {
                     p = stack.get(i);
                     p.parent = stack.get(i - 1);
+                    p.sum -= p.parent.sum;
                     p.parent.sum += p.sum;
                 }
 
-                this.sum += this.parent.sum;
-
                 if (this.sum < 0) {
-                    throw new RuntimeException("Panic " + this.sum + " " + this.parent.sum);
+                    throw new RuntimeException("Sum overflow at node: " + this.id);
                 }
             }
 
@@ -161,7 +149,7 @@ public class Solution {
             while (parent != null) {
                 parent.sum += this.sum;
                 if (parent.sum < 0) {
-                    throw new RuntimeException("Panic " + sum);
+                    throw new RuntimeException("Sum overflow at node: " + parent.id);
                 }
 
                 parent = parent.parent;
