@@ -10,9 +10,13 @@ public class Solution {
     private static Edge[] edges;
 
     public static void main(String[] args) {
-        readQuery();
-        long result = solve();
-        System.out.println(result);
+        int q = scanner.nextInt();
+
+        for (int i = 0; i < q; i++) {
+            readQuery();
+            long result = solve();
+            System.out.println(result);
+        }
     }
 
     public static long solve() {
