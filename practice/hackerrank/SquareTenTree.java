@@ -1,15 +1,17 @@
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * Created by bmk on 12/9/16.
  */
 public class SquareTenTree {
 
-    private static Scanner scanner = new Scanner(System.in);
+    private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void main(String[] args) {
-        String lLine = scanner.nextLine();
-        String rLine = scanner.nextLine();
+    public static void main(String[] args) throws IOException {
+        String lLine = reader.readLine();
+        String rLine = reader.readLine();
 
         int[] lDigits = readDigits(lLine, rLine.length());
         int[] rDigits = readDigits(rLine, rLine.length());
