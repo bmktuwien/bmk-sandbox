@@ -61,10 +61,11 @@ public class SquareTenTree {
                     lTemp = lLevels[level].length();
                 }
             } else {
-                lLevels[level].append((10 - lDigits[i] - c) % 10);
+                int l = (10 - lDigits[i] - c) % 10;
+                lLevels[level].append(l);
                 rLevels[level].append(rDigits[i]);
 
-                if ((10 - lDigits[i] - c) % 10 != 0) {
+                if (l != 0) {
                     lTemp = lLevels[level].length();
                 }
 
