@@ -10,6 +10,15 @@ public class Solution {
     private static long totalSum;
     private static Map<Long, List<Node>> lookupTable;
 
+    /**
+     * REMARKS after studying editorial solution:
+     *
+     * - Use DFS timestamps to determine fast ancestor relationship!
+     * - Build tree once (WITHOUT parent/child rewiring at each step!!!)
+     *   and calculate the sums in one pass
+     * - Save everything aux information in a map for fast lookup!
+     *
+     */
     public static void main(String[] args) {
         int q = scanner.nextInt();
 
