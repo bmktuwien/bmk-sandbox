@@ -8,86 +8,66 @@ public class Solution {
     private static Scanner scanner = new Scanner(System.in);
     private static Node[] nodes;
     private static Edge[] edges;
+    private static long totalSum;
+    private static Node root;
 
     public static void main(String[] args) {
         int q = scanner.nextInt();
 
         for (int i = 0; i < q; i++) {
             readQuery();
-            long result = solve();
+            Map<Long, List<Node>> candidates = findCandidates();
+            long result = solve(candidates);
             System.out.println(result);
         }
     }
 
-    public static long solve() {
+    public static long solve(Map<Long, List<Node>> candidates) {
         long result = -1;
 
-        // brute force all edge pairs
-        for (int i = 0; i < edges.length; i++) {
-            for (int j = i + 1; j < edges.length; j++) {
-                Edge e1 = edges[i];
-                Edge e2 = edges[j];
-
-                Node child = nodes[e1.xId].parent == nodes[e1.yId] ? nodes[e1.xId] : nodes[e1.yId];
-                Node child2 = nodes[e2.xId].parent == nodes[e2.yId] ? nodes[e2.xId] : nodes[e2.yId];
-
-                // make sure child is at bottom
-                if (child2.sum < child.sum) {
-                    Node tmp = child;
-                    child = child2;
-                    child2 = tmp;
+        for (long sum : candidates.keySet()) {
+            if (candidates.get(sum).size() > 1) {
+                long cw = 3 * sum - totalSum;
+                if (result == -1 || cw < result) {
+                    result = cw;
                 }
-
-                long sum1 = child.sum;
-                long sum2 = child2.sum;
-                long sum3 = 0;
-
-                Node p = child.parent;
-                while (p.parent != null) {
-                    if (p.parent == child2) {
-                        sum2 -= sum1;
-                        sum3 -= sum1;
-                    }
-
-                    p = p.parent;
-                }
-
-                sum3 += p.sum;
-
-                // calculate minimum cw
-                long min = Long.MAX_VALUE;
-                if (sum1 == sum2 && sum3 < sum1 && sum1 - sum3 < min) {
-                    min = sum1 - sum3;
-                }
-
-                if (sum1 == sum3 && sum2 < sum1 && sum1 - sum2 < min) {
-                    min = sum1 - sum2;
-                }
-
-                if (sum2 == sum3 && sum1 < sum2 && sum2 - sum1 < min) {
-                    min = sum2 - sum1;
-                }
-
-                System.out.println(min);
-                if (min != Long.MAX_VALUE) {
-                    if (result < 0 || min < result) {
-                        result = min;
-                    }
-                }
+            } else if (candidates.containsKey(sum * 2)) {
+                System.out.println(sum);
             }
         }
 
         return result;
     }
 
+    public static Map<Long, List<Node>> findCandidates() {
+        long threshold = totalSum / 3;
+        HashMap<Long, List<Node>> candidates = new HashMap<>();
+
+        for (Node node : nodes) {
+            if (node.sum > threshold) {
+                if (candidates.containsKey(node.sum)) {
+                    candidates.get(node.sum).add(node);
+                } else {
+                    List<Node> l = new ArrayList<>();
+                    l.add(node);
+                    candidates.put(node.sum, l);
+                }
+            }
+        }
+
+        return candidates;
+    }
+
     public static void readQuery() {
         int n = scanner.nextInt();
 
+        totalSum = 0;
         // read nodes
         nodes = new Node[n];
         for (int i = 0; i < n; i++) {
             long c = scanner.nextLong();
             nodes[i] = new Node(i, c);
+            totalSum += c;
         }
 
         // read edges
@@ -106,6 +86,16 @@ public class Solution {
 
             child.addParent(parent);
         }
+
+        // find root
+        /*for (Node node : nodes) {
+            if (node.parent == null) {
+                root = node;
+            }
+        }*/
+
+        //System.out.println("Total sum: " + totalSum);
+        //System.out.println("Root sum: " + root.sum);
     }
 
     public static class Node {
