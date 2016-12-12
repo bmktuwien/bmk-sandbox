@@ -10,7 +10,6 @@ public class Solution {
     private static long totalSum;
 
     private static Map<Long, Boolean> lookupTable;
-    private static List<Node> candidates;
 
     public static void main(String[] args) {
         int q = scanner.nextInt();
@@ -24,35 +23,57 @@ public class Solution {
     }
 
     public static long solve() {
-        for (Node candidate : candidates) {
-            long diff = totalSum - candidate.sum;
+        long result = -1;
 
-            if (diff % 2 == 0) {
-                if (lookupTable.containsKey(diff / 2)) {
-                    System.out.println(diff / 2 - candidate.sum);
-                    break;
+        for (Node node : nodes) {
+            if (node.parent == null) {
+                continue;
+            }
+
+            long diff = totalSum - node.sum;
+
+            if (diff < node.sum) {
+                if (node.sum % 2 == 0 && node.sum / 2 > diff) {
+                    if (lookupTable.containsKey(node.sum / 2)) {
+                        long cw = node.sum / 2 - diff;
+
+                        if (result == -1 || cw < result) {
+                            result = cw;
+                        }
+                    }
+                }
+
+                if (2 * diff > node.sum) {
+                    if (lookupTable.containsKey(diff)) {
+                        long cw = 2 * diff - node.sum;
+
+                        if (result == -1 || cw < result) {
+                            result = cw;
+                        }
+                    }
+                }
+            } else {
+                if (diff % 2 == 0  && diff / 2 > node.sum) {
+                    if (lookupTable.containsKey(diff / 2)) {
+                        long cw = diff / 2 - node.sum;
+
+                        if (result == -1 || cw < result) {
+                            result = cw;
+                        }
+                    }
                 }
             }
         }
 
-        return -1;
+        return result;
     }
 
     public static void buildAux() {
-        long threshold = totalSum / 3;
         lookupTable = new HashMap<>();
-        candidates = new ArrayList<>();
 
         for (Node node : nodes) {
             lookupTable.put(node.sum, true);
-
-            if (node.sum < threshold) {
-                candidates.add(node);
-            }
         }
-
-        candidates.sort(Comparator.comparing(Node::getSum));
-        Collections.reverse(candidates);
     }
 
     public static void readQuery() {
@@ -84,8 +105,14 @@ public class Solution {
             child.addParent(parent);
         }
 
-        //System.out.println("Total sum: " + totalSum);
-        //System.out.println("Root sum: " + root.sum);
+        /*Node root = null;
+        for (Node node : nodes) {
+            if (node.parent == null) {
+                root = node;
+            }
+        }
+        System.out.println("Total sum: " + totalSum);
+        System.out.println("Root sum: " + root.sum);*/
     }
 
     public static class Node {
