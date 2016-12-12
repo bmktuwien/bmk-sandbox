@@ -7,55 +7,52 @@ public class Solution {
 
     private static Scanner scanner = new Scanner(System.in);
     private static Node[] nodes;
-    private static Edge[] edges;
     private static long totalSum;
-    private static Node root;
+
+    private static Map<Long, Boolean> lookupTable;
+    private static List<Node> candidates;
 
     public static void main(String[] args) {
         int q = scanner.nextInt();
 
         for (int i = 0; i < q; i++) {
             readQuery();
-            Map<Long, List<Node>> candidates = findCandidates();
-            long result = solve(candidates);
+            buildAux();
+            long result = solve();
             System.out.println(result);
         }
     }
 
-    public static long solve(Map<Long, List<Node>> candidates) {
-        long result = -1;
+    public static long solve() {
+        for (Node candidate : candidates) {
+            long diff = totalSum - candidate.sum;
 
-        for (long sum : candidates.keySet()) {
-            if (candidates.get(sum).size() > 1) {
-                long cw = 3 * sum - totalSum;
-                if (result == -1 || cw < result) {
-                    result = cw;
+            if (diff % 2 == 0) {
+                if (lookupTable.containsKey(diff / 2)) {
+                    System.out.println(diff / 2 - candidate.sum);
+                    break;
                 }
-            } else if (candidates.containsKey(sum * 2)) {
-                System.out.println(sum);
             }
         }
 
-        return result;
+        return -1;
     }
 
-    public static Map<Long, List<Node>> findCandidates() {
+    public static void buildAux() {
         long threshold = totalSum / 3;
-        HashMap<Long, List<Node>> candidates = new HashMap<>();
+        lookupTable = new HashMap<>();
+        candidates = new ArrayList<>();
 
         for (Node node : nodes) {
-            if (node.sum > threshold) {
-                if (candidates.containsKey(node.sum)) {
-                    candidates.get(node.sum).add(node);
-                } else {
-                    List<Node> l = new ArrayList<>();
-                    l.add(node);
-                    candidates.put(node.sum, l);
-                }
+            lookupTable.put(node.sum, true);
+
+            if (node.sum < threshold) {
+                candidates.add(node);
             }
         }
 
-        return candidates;
+        candidates.sort(Comparator.comparing(Node::getSum));
+        Collections.reverse(candidates);
     }
 
     public static void readQuery() {
@@ -71,7 +68,7 @@ public class Solution {
         }
 
         // read edges
-        edges = new Edge[n - 1];
+        Edge[] edges = new Edge[n - 1];
         for (int i = 0; i < n - 1; i++) {
             int xId = scanner.nextInt() - 1;
             int yId = scanner.nextInt() - 1;
@@ -86,13 +83,6 @@ public class Solution {
 
             child.addParent(parent);
         }
-
-        // find root
-        /*for (Node node : nodes) {
-            if (node.parent == null) {
-                root = node;
-            }
-        }*/
 
         //System.out.println("Total sum: " + totalSum);
         //System.out.println("Root sum: " + root.sum);
@@ -144,6 +134,10 @@ public class Solution {
 
                 parent = parent.parent;
             }
+        }
+
+        public long getSum() {
+            return sum;
         }
     }
 
