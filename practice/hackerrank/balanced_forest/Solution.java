@@ -8,8 +8,7 @@ public class Solution {
     private static Scanner scanner = new Scanner(System.in);
     private static Node[] nodes;
     private static long totalSum;
-
-    private static Map<Long, Boolean> lookupTable;
+    private static Map<Long, List<Node>> lookupTable;
 
     public static void main(String[] args) {
         int q = scanner.nextInt();
@@ -22,19 +21,75 @@ public class Solution {
         }
     }
 
+    public static boolean existsSubTreeWithSum(long sum, Node node, boolean connected) {
+        List<Node> nodes = lookupTable.get(sum);
+        HashMap<Integer, Node> tabu = new HashMap<>();
+
+        if (!connected) {
+            Node n = node.parent;
+
+            while (n != null) {
+                if (n.sum - node.sum == sum) {
+                    return true;
+                }
+
+                tabu.put(n.id, n);
+                n = n.parent;
+            }
+        }
+
+        boolean flag = false;
+        if (nodes != null) {
+            for (Node n : nodes) {
+                if (tabu.containsKey(n.id) || n.id == node.id) {
+                    continue;
+                }
+
+                flag = true;
+                while (n != null) {
+                    if (n.parent == node) {
+                        return connected;
+                    }
+
+                    n = n.parent;
+                }
+            }
+
+            return flag && !connected;
+        } else {
+            return false;
+        }
+
+    }
+
     public static long solve() {
         long result = -1;
 
         for (Node node : nodes) {
             if (node.parent == null) {
+                if (node.sum % 2 == 0) {
+                    if (lookupTable.containsKey(node.sum / 2)) {
+                        long cw = node.sum / 2;
+                        if (result == -1 || cw < result) {
+                            result = cw;
+                        }
+                    }
+                }
+
+                if (node.sum % 3 == 0) {
+                    if (lookupTable.getOrDefault(node.sum / 3, new ArrayList<>()).size() > 1) {
+                        return 0;
+                    }
+                }
+
                 continue;
             }
 
             long diff = totalSum - node.sum;
 
-            if (diff < node.sum) {
-                if (node.sum % 2 == 0 && node.sum / 2 > diff) {
-                    if (lookupTable.containsKey(node.sum / 2)) {
+            if (diff <= node.sum) {
+                if (node.sum % 2 == 0 && node.sum / 2 >= diff) {
+                    if (existsSubTreeWithSum(node.sum / 2, node, true)) {
                         long cw = node.sum / 2 - diff;
 
                         if (result == -1 || cw < result) {
@@ -44,7 +99,7 @@ public class Solution {
                 }
 
                 if (2 * diff > node.sum) {
-                    if (lookupTable.containsKey(diff)) {
+                    if (existsSubTreeWithSum(diff, node, true)) {
                         long cw = 2 * diff - node.sum;
 
                         if (result == -1 || cw < result) {
@@ -53,9 +108,19 @@ public class Solution {
                     }
                 }
             } else {
-                if (diff % 2 == 0  && diff / 2 > node.sum) {
-                    if (lookupTable.containsKey(diff / 2)) {
+                if (diff % 2 == 0  && diff / 2 >= node.sum) {
+                    if (existsSubTreeWithSum(diff / 2, node, false)) {
                         long cw = diff / 2 - node.sum;
+
+                        if (result == -1 || cw < result) {
+                            result = cw;
+                        }
+                    }
+                }
+
+                if (2 * node.sum > diff) {
+                    if (existsSubTreeWithSum(node.sum, node, false)) {
+                        long cw = 2 * node.sum - diff;
 
                         if (result == -1 || cw < result) {
                             result = cw;
@@ -72,7 +137,13 @@ public class Solution {
         lookupTable = new HashMap<>();
 
         for (Node node : nodes) {
-            lookupTable.put(node.sum, true);
+            if (lookupTable.containsKey(node.sum)) {
+                lookupTable.get(node.sum).add(node);
+            } else {
+                List<Node> l = new ArrayList<>();
+                l.add(node);
+                lookupTable.put(node.sum, l);
+            }
         }
     }
 
@@ -161,10 +232,6 @@ public class Solution {
 
                 parent = parent.parent;
             }
-        }
-
-        public long getSum() {
-            return sum;
         }
     }
 
