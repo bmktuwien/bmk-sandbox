@@ -28,35 +28,41 @@ public class BalancedBrackets {
 
     public static boolean balanced(String line) {
         Stack<Character> stack = new Stack<>();
+        Boolean flag = null;
 
         try {
             for (char c : line.toCharArray()) {
+                Character matchingOpenChr = null;
+
                 switch (c) {
                     case '(':
                     case '{':
                     case '[':
                         stack.push(c);
-                        break;
+                        continue;
                     case ')':
-                        if (stack.pop() != '(') {
-                            return false;
-                        }
+                        matchingOpenChr = '(';
                         break;
                     case '}':
-                        if (stack.pop() != '{') {
-                            return false;
-                        }
+                        matchingOpenChr = '{';
                         break;
                     case ']':
-                        if (stack.pop() != '[') {
-                            return false;
-                        }
+                        matchingOpenChr = '[';
                         break;
+                }
 
+                if (stack.pop() != matchingOpenChr) {
+                    flag = false;
+                } else {
+                    if (flag != null && !flag) {
+                        return false;
+                    }
+
+                    flag = true;
                 }
             }
 
-            return true;
+            return stack.isEmpty();
         } catch (EmptyStackException e) {
             return false;
         }
