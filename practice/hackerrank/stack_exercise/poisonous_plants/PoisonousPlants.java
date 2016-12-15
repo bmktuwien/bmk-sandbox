@@ -6,17 +6,17 @@ import java.util.*;
 public class PoisonousPlants {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        /*Scanner scanner = new Scanner(System.in);
         int n = scanner.nextInt();
 
-        ArrayList<Integer> list = new ArrayList<>(n);
+        Stack<Integer> stack = new Stack<>();
         for (int i = 0; i < n; i++) {
-            list.add(scanner.nextInt());
+            stack.push(scanner.nextInt());
         }
 
-        System.out.println(bruteForce(list));
+        System.out.println(bruteForce(stack));
 
-        /*Collections.reverse(stack);
+        Collections.reverse(stack);
 
         long result = 0;
         long l;
@@ -29,10 +29,10 @@ public class PoisonousPlants {
         } while (l > 0);
 
         System.out.println(result);*/
-        //bugSearch();
+        bugSearch();
     }
 
-    /*public static void bugSearch() {
+    public static void bugSearch() {
         Random r = new Random();
 
         while (true) {
@@ -71,13 +71,13 @@ public class PoisonousPlants {
             }
         }
 
-    }*/
+    }
 
-    public static long bruteForce(List<Integer> list) {
+    public static long bruteForce(Stack<Integer> stack) {
         int counter = 0;
         boolean flag = true;
 
-        //List<Integer> list = stack.subList(0, stack.size());
+        List<Integer> list = stack.subList(0, stack.size());
 
         while (flag) {
             flag = false;
@@ -105,11 +105,10 @@ public class PoisonousPlants {
     }
 
     // broken
-    /*public static long solve(Stack<Integer> stack) {
+    public static long solve(Stack<Integer> stack) {
         long startValue = Long.MAX_VALUE;
         long day = 0;
-        HashMap<Long, Long> map = new HashMap<>();
-
+        Stack<Entry> history = new Stack<>();
 
         try {
             // skip falling piece
@@ -133,23 +132,22 @@ public class PoisonousPlants {
                 // falling piece
                 while (stack.peek() > startValue && stack.peek() <= v) {
                     v = stack.pop();
-
-                    while (map.containsKey(d+1)) {
-                        if (v <= map.get(d+1)) {
-                            d++;
-                        } else {
-                            break;
-                        }
-                    }
-
                     d++;
-
-                    if (d > day) {
-                        day = d;
-                    }
                 }
 
-                map.put(d, v);
+                while (!history.isEmpty() && history.peek().day <= d) {
+                    history.pop();
+                }
+
+                while (!history.isEmpty() && history.peek().value >= v) {
+                    d = history.pop().day + 1;
+                }
+
+                history.push(new Entry(d, v));
+
+                if (d > day) {
+                    day = d;
+                }
 
                 if (stack.peek() <= startValue) {
                     break;
@@ -160,6 +158,15 @@ public class PoisonousPlants {
         }
 
         return day;
-    }*/
+    }
 
+    public static class Entry {
+        long day;
+        long value;
+
+        public Entry(long day, long value) {
+            this.day = day;
+            this.value = value;
+        }
+    }
 }
