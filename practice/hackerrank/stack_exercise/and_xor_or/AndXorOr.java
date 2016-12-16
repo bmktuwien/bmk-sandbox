@@ -8,9 +8,9 @@ import java.util.Scanner;
 public class AndXorOr {
 
     public static void main(String[] args) {
-        long[] input = getRandomInput(1000000);
-        System.out.println(bruteForce(input));
-        //experiment3();
+        //long[] input = getRandomInput(1000000);
+        //System.out.println(bruteForce(input));
+        experiment3();
     }
 
     public static long evaluate(long l1, long l2) {
@@ -19,6 +19,8 @@ public class AndXorOr {
 
     public static long bruteForce(long[] input) {
         long max = 0;
+        long best1 = 0;
+        long best2 = 0;
 
         for (int i = 0; i < input.length - 1; i++) {
             long min = input[i + 1];
@@ -28,29 +30,32 @@ public class AndXorOr {
                     long l = evaluate(input[i], input[j]);
 
                     if (l > max) {
+                        best1 = input[i];
+                        best2 = input[j];
                         max = l;
                     }
                 }
             }
         }
 
+        System.out.println(best1 + " " + best2 + ": " + max);
         return max;
     }
 
     public static void experiment3() {
         Random r = new Random();
 
-        long[] input = new long[1000000];
+        long[] input = new long[20];
         for (int i = 0; i < input.length; i++) {
-            input[i] = r.nextInt(20);
+            input[i] = r.nextInt(100);
             System.out.print(input[i] + " ");
         }
 
         System.out.println();
 
-        for (int i = 1; i < input.length; i++) {
+        for (int i = 2; i < input.length; i++) {
             long[] sub = Arrays.copyOf(input, i);
-            System.out.println(bruteForce(sub));
+            bruteForce(sub);
         }
     }
 
