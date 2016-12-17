@@ -10,7 +10,8 @@ public class AndXorOr {
     public static void main(String[] args) {
         //long[] input = getRandomInput(1000000);
         long[] input = readInput();
-        System.out.println(bruteForce(input));
+        //System.out.println(bruteForce(input));
+        System.out.println(solve(input));
         //experiment3();
     }
 
@@ -24,7 +25,6 @@ public class AndXorOr {
         for (int i = 0; i < input.length - 1; i++) {
             long min = Long.MAX_VALUE;
 
-            int counter = 0;
             for (int j = i + 1; j < input.length; j++) {
                 if (input[j] < min) {
                     min = input[j];
@@ -35,34 +35,85 @@ public class AndXorOr {
                     }
                 }
 
-                counter++;
-
                 if (min <= input[i]) {
                     break;
                 }
             }
+        }
 
-            System.out.println("counter: " + counter);
+        return max;
+    }
+
+    public static long solve(long[] input) {
+        long max = 0;
+        int firstPeak = 0;
+
+        for (int i = 0; i < input.length - 1; i++) {
+            int j = i + 1;
+
+            long min = input[j];
+            long l = evaluate(input[i], input[j]);
+
+            if (l > max) {
+                max = l;
+            }
+
+            boolean raising = true;
+            long tmp = input[j];
+            int firstPeakTmp = 0;
+
+            j = Math.max(j, firstPeak);
+            while (j < input.length) {
+
+                // update first peak if i is past old firstPeak value
+                if (raising && input[j] >= tmp) {
+                    firstPeakTmp = j;
+                    tmp = input[j];
+                } else {
+                    raising = false;
+                }
+
+                if (input[j] < min) {
+                    min = input[j];
+                    l = evaluate(input[i], input[j]);
+
+                    if (l > max) {
+                        max = l;
+                    }
+                }
+
+                if (min <= input[i]) {
+                    break;
+                }
+
+                j++;
+            }
+
+            if (i + 1 >= firstPeak) {
+                firstPeak = firstPeakTmp;
+            }
         }
 
         return max;
     }
 
     public static void experiment3() {
-        Random r = new Random();
+       while (true) {
+           long[] input = getRandomInput(50);
 
-        long[] input = new long[20];
-        for (int i = 0; i < input.length; i++) {
-            input[i] = r.nextInt(100);
-            System.out.print(input[i] + " ");
-        }
+           long r1 = bruteForce(input);
+           long r2 = solve(input);
 
-        System.out.println();
+           if (r1 != r2) {
+               for (long l : input) {
+                   System.out.print(l + " ");
+               }
+               System.out.println();
+               System.out.println(r1 + " " + r2);
 
-        for (int i = 2; i < input.length; i++) {
-            long[] sub = Arrays.copyOf(input, i);
-            bruteForce(sub);
-        }
+               break;
+           }
+       }
     }
 
     public static long[] getRandomInput(int n) {
@@ -70,7 +121,7 @@ public class AndXorOr {
 
         long[] input = new long[n];
         for (int i = 0; i < input.length; i++) {
-            input[i] = r.nextLong();
+            input[i] = r.nextInt(30);
             //System.out.print(input[i] + " ");
         }
 
