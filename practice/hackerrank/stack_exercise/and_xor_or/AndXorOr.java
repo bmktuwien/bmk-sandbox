@@ -9,8 +9,9 @@ public class AndXorOr {
 
     public static void main(String[] args) {
         //long[] input = getRandomInput(1000000);
-        //System.out.println(bruteForce(input));
-        experiment3();
+        long[] input = readInput();
+        System.out.println(bruteForce(input));
+        //experiment3();
     }
 
     public static long evaluate(long l1, long l2) {
@@ -19,26 +20,31 @@ public class AndXorOr {
 
     public static long bruteForce(long[] input) {
         long max = 0;
-        long best1 = 0;
-        long best2 = 0;
 
         for (int i = 0; i < input.length - 1; i++) {
-            long min = input[i + 1];
+            long min = Long.MAX_VALUE;
+
+            int counter = 0;
             for (int j = i + 1; j < input.length; j++) {
-                if (input[j] <= min) {
+                if (input[j] < min) {
                     min = input[j];
                     long l = evaluate(input[i], input[j]);
 
                     if (l > max) {
-                        best1 = input[i];
-                        best2 = input[j];
                         max = l;
                     }
                 }
+
+                counter++;
+
+                if (min <= input[i]) {
+                    break;
+                }
             }
+
+            System.out.println("counter: " + counter);
         }
 
-        System.out.println(best1 + " " + best2 + ": " + max);
         return max;
     }
 
@@ -64,7 +70,7 @@ public class AndXorOr {
 
         long[] input = new long[n];
         for (int i = 0; i < input.length; i++) {
-            input[i] = r.nextInt(20);
+            input[i] = r.nextLong();
             //System.out.print(input[i] + " ");
         }
 
