@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Stack;
 
 /**
  * Created by bmk on 12/16/16.
@@ -8,7 +9,7 @@ import java.util.Scanner;
 public class AndXorOr {
 
     public static void main(String[] args) {
-        //long[] input = getRandomInput(1000000);
+        //long[] input = getRandomInput(20);
         long[] input = readInput();
         //System.out.println(bruteForce(input));
         System.out.println(solve(input));
@@ -22,15 +23,23 @@ public class AndXorOr {
     public static long bruteForce(long[] input) {
         long max = 0;
 
+        long best1 = 0;
+        long best2 = 0;
+
         for (int i = 0; i < input.length - 1; i++) {
             long min = Long.MAX_VALUE;
+
 
             for (int j = i + 1; j < input.length; j++) {
                 if (input[j] < min) {
                     min = input[j];
                     long l = evaluate(input[i], input[j]);
 
-                    if (l > max) {
+                    if (l >= max) {
+                        if (input[i] > best1 || input[j] > best2) {
+                            best1 = input[i];
+                            best2 = input[j];
+                        }
                         max = l;
                     }
                 }
@@ -41,10 +50,41 @@ public class AndXorOr {
             }
         }
 
+        //System.out.println(best1 + " " + best2);
+        //System.out.println(Long.toBinaryString(best1) + " " + Long.toBinaryString(best2));
+
         return max;
     }
 
     public static long solve(long[] input) {
+        Stack<Long> stack = new Stack<>();
+
+        long max = 0;
+
+        for (long l : input) {
+            while (!stack.isEmpty() && stack.peek() >= l) {
+                long tmp = evaluate(l, stack.pop());
+
+                if (tmp > max) {
+                    max = tmp;
+                }
+            }
+
+            if (!stack.isEmpty()) {
+                long tmp = evaluate(l, stack.peek());
+
+                if (tmp > max) {
+                    max = tmp;
+                }
+            }
+
+            stack.push(l);
+        }
+
+        return max;
+    }
+
+    public static long solve2(long[] input) {
         long max = 0;
         int firstPeak = 0;
 
@@ -121,10 +161,11 @@ public class AndXorOr {
 
         long[] input = new long[n];
         for (int i = 0; i < input.length; i++) {
-            input[i] = r.nextInt(30);
+            input[i] = r.nextInt(1000000);
             //System.out.print(input[i] + " ");
         }
 
+        //System.out.println();
         return input;
     }
 
