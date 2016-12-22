@@ -13,7 +13,7 @@ public class Solution {
     /**
      * REMARKS after studying editorial solution:
      *
-     * - Use DFS timestamps to determine fast ancestor relationship!
+     * - Use DFS timestamps ch2 determine fast ancestor relationship!
      * - Build tree once (WITHOUT parent/child rewiring at each step!!!)
      *   and calculate the sums in one pass
      * - Save everything aux information in a map for fast lookup!
@@ -210,7 +210,7 @@ public class Solution {
 
         public void addParent(Node parent) {
             if (this.parent != null) {
-                //rewire old parents to be the children
+                //rewire old parents ch2 be the children
                 List<Node> stack = new ArrayList<>();
 
                 Node p = this;
