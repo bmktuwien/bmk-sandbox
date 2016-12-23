@@ -141,18 +141,25 @@ public class ArrayQueries {
     public static Chunk append(int i, int j, Chunk head) {
         ChunkPair cp = findInterval(i, j, head);
 
-        Chunk end = head;
-        while (end.next != null) {
-            end = end.next;
-        }
 
         if (cp.ch1 != cp.ch2) {
             Chunk c = cp.ch1.split(i - cp.beginIdx1);
             cp.ch1.next = cp.ch2.split(j - cp.beginIdx2 + 1);
+
+            Chunk end = head;
+            while (end.next != null) {
+                end = end.next;
+            }
+
             end.next = c;
 
             return head;
         } else {
+            Chunk end = head;
+            while (end.next != null) {
+                end = end.next;
+            }
+
             end.next = cp.ch1.split2(i - cp.beginIdx1, j - cp.beginIdx1);
 
             return head;
@@ -169,6 +176,20 @@ public class ArrayQueries {
 
             head = head.next;
         }
+    }
+
+    public static void printChunks(Chunk head) {
+        int idx = 0;
+        while (head != null) {
+            int from = idx;
+            int to = from + head.content.length - 1;
+
+            System.out.print("Chunk: " + from + " - " + to + ", ");
+            idx = from + head.content.length;
+            head = head.next;
+        }
+
+        System.out.println();
     }
 
     public static ChunkPair findInterval(int i, int j, Chunk head) {
