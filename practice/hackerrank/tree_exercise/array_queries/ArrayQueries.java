@@ -1,10 +1,11 @@
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 public class ArrayQueries {
 
     static Scanner scanner = new Scanner(System.in);
-    static int chunkSize = 10;
+    static int chunkSize = 1000;
 
     public static void main(String[] args) {
         int n = scanner.nextInt();
@@ -12,10 +13,81 @@ public class ArrayQueries {
 
         Chunk head = readInput(n);
 
-        head = append(1, 1, head);
-        balance(head);
+        for (int i = 0; i < m; i++) {
+            int type = scanner.nextInt();
+            int p = scanner.nextInt();
+            int q = scanner.nextInt();
 
-        System.out.println("done");
+            if (type == 1) {
+                head = prepend(p - 1, q - 1, head);
+            } else {
+                head = append(p - 1, q - 1, head);
+            }
+
+            balance(head);
+        }
+
+        Chunk end = head;
+        while (end.next != null) {
+            end = end.next;
+        }
+
+        System.out.println(Math.abs(head.content[0] - end.content[end.content.length - 1]));
+        while (head != null) {
+            long[] content = head.content;
+            for (long l : content) {
+                System.out.print(l + " ");
+            }
+
+            head = head.next;
+        }
+        System.out.println();
+    }
+
+    public static void experiment() {
+        Chunk head = randomInput(100000);
+
+        Random r = new Random();
+        for (int i = 0; i < 100000; i++) {
+            int k = r.nextInt(10000);
+            int l = Math.min(10000 - 1, k + r.nextInt(1000));
+
+            head = append(k, l, head);
+
+            balance(head);
+        }
+    }
+
+    public static Chunk randomInput(int n) {
+        Random r = new Random();
+        Chunk head = null;
+        Chunk prev = null;
+
+        int i = 0;
+        while (i < n) {
+            long[] chunk = new long[Math.min(chunkSize, n - i)];
+
+            int j = 0;
+            while (i < n && j < chunk.length) {
+                chunk[j] = r.nextInt(100000);
+                j++;
+                i++;
+            }
+
+            if (j > 0) {
+                Chunk c = new Chunk(chunk);
+
+                if (head == null) {
+                    head = c;
+                    prev = head;
+                } else {
+                    prev.next = c;
+                    prev = c;
+                }
+            }
+        }
+
+        return head;
     }
 
     public static Chunk readInput(int n) {
