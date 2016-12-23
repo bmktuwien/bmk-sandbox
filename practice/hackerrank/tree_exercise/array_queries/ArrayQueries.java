@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class ArrayQueries {
 
     static Scanner scanner = new Scanner(System.in);
-    static int chunkSize = 3;
+    static int chunkSize = 10;
 
     public static void main(String[] args) {
         int n = scanner.nextInt();
@@ -12,7 +12,9 @@ public class ArrayQueries {
 
         Chunk head = readInput(n);
 
-        head = append(4, 5, head);
+        head = append(1, 1, head);
+        balance(head);
+
         System.out.println("done");
     }
 
@@ -76,12 +78,24 @@ public class ArrayQueries {
             Chunk c = cp.ch1.split(i - cp.beginIdx1);
             cp.ch1.next = cp.ch2.split(j - cp.beginIdx2 + 1);
             end.next = c;
-            return head;
-        } else {
-            Chunk c = cp.ch1.split2(i - cp.beginIdx1, j - cp.beginIdx1);
-            end.next = c;
 
             return head;
+        } else {
+            end.next = cp.ch1.split2(i - cp.beginIdx1, j - cp.beginIdx1);
+
+            return head;
+        }
+    }
+
+    public static void balance(Chunk head) {
+        while (head != null) {
+            if (head.getSize() >= 2 * chunkSize) {
+                head.divide();
+            } else if (head.getSize() < chunkSize / 2) {
+                head.merge();
+            }
+
+            head = head.next;
         }
     }
 
@@ -155,6 +169,23 @@ public class ArrayQueries {
 
             return new Chunk(ls1);
 
+        }
+
+        public int getSize() {
+            return content.length;
+        }
+
+        public void divide() {
+            int l = getSize() / 2;
+
+            this.next = split(l);
+        }
+
+        public void merge() {
+            if (next != null) {
+                this.content = concat(this.content, next.content);
+                this.next = this.next.next;
+            }
         }
     }
 
