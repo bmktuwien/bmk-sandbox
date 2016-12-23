@@ -12,7 +12,7 @@ public class ArrayQueries {
 
         Chunk head = readInput(n);
 
-        head = prependAtFront(4, 5, head);
+        head = append(4, 5, head);
         System.out.println("done");
     }
 
@@ -22,7 +22,7 @@ public class ArrayQueries {
 
         int i = 0;
         while (i < n) {
-            long[] chunk = new long[chunkSize];
+            long[] chunk = new long[Math.min(chunkSize, n - i)];
 
             int j = 0;
             while (i < n && j < chunk.length) {
@@ -47,7 +47,7 @@ public class ArrayQueries {
         return head;
     }
 
-    public static Chunk prependAtFront(int i, int j, Chunk head) {
+    public static Chunk prepend(int i, int j, Chunk head) {
         ChunkPair cp = findInterval(i, j, head);
 
         if (cp.ch1 != cp.ch2) {
@@ -61,6 +61,27 @@ public class ArrayQueries {
             newHead.next = head;
 
             return newHead;
+        }
+    }
+
+    public static Chunk append(int i, int j, Chunk head) {
+        ChunkPair cp = findInterval(i, j, head);
+
+        Chunk end = head;
+        while (end.next != null) {
+            end = end.next;
+        }
+
+        if (cp.ch1 != cp.ch2) {
+            Chunk c = cp.ch1.split(i - cp.beginIdx1);
+            cp.ch1.next = cp.ch2.split(j - cp.beginIdx2 + 1);
+            end.next = c;
+            return head;
+        } else {
+            Chunk c = cp.ch1.split2(i - cp.beginIdx1, j - cp.beginIdx1);
+            end.next = c;
+
+            return head;
         }
     }
 
