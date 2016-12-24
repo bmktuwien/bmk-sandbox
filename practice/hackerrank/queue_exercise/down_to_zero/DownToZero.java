@@ -7,23 +7,23 @@ public class DownToZero {
 
     public static void main(String[] args) {
         Map<Integer, Entry> factorMap = factorMap();
-        Map<Integer, Integer> minMap = minMap(factorMap);
+        int[] minMap = minMap(factorMap);
 
         Scanner scanner = new Scanner(System.in);
         int q = scanner.nextInt();
 
         for (int i = 0; i < q; i++) {
             int n = scanner.nextInt();
-            System.out.println(minMap.get(n));
+            System.out.println(minMap[n]);
         }
     }
 
-    public static Map<Integer, Integer> minMap(Map<Integer, Entry> factorMap) {
-        Map<Integer, Integer> map = new HashMap<>();
-        map.put(0, 0);
-        map.put(1, 1);
+    public static int[] minMap(Map<Integer, Entry> factorMap) {
+        int[] map = new int[1000000];
+        map[0] = 0;
+        map[1] = 1;
 
-        for (int i = 2; i < 1000000; i++) {
+        for (int i = 2; i < map.length; i++) {
             List<Integer> primeFactors = new ArrayList<>();
 
             Entry e = factorMap.get(i);
@@ -32,7 +32,7 @@ public class DownToZero {
                 e = factorMap.get(e.b);
             } while (e != null);
 
-            int min = map.get(i - 1);
+            int min = map[i - 1];
 
             for (int j = 1; j < (1 << primeFactors.size()) - 1; j++) {
                 int f0 = 1;
@@ -46,13 +46,13 @@ public class DownToZero {
                     }
                 }
 
-                int t = map.get(Math.max(f0, f1));
+                int t = map[Math.max(f0, f1)];
                 if (t < min) {
                     min = t;
                 }
             }
 
-            map.put(i, min + 1);
+            map[i] = min + 1;
         }
 
         return map;
