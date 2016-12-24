@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by bmk on 12/24/16.
@@ -28,11 +26,27 @@ public class CastleGrid {
         int c = scanner.nextInt();
         int d = scanner.nextInt();
 
-        solve(blocked, n, new Point(a, b), new Point(c, d));
+        solve(blocked, n, new Point(a, b, 0), new Point(c, d, 0));
     }
 
     public static void solve(boolean[][] blocked, int n, Point origin, Point dest) {
-        //TODO
+        Queue<Point> moves = new LinkedList<>();
+        boolean[][] visited = new boolean[n][n];
+
+        moves.add(origin);
+
+        while (!moves.isEmpty()) {
+            List<Point> next = nextMoves(moves.remove(), n, blocked, visited);
+
+            for (Point p : next) {
+                if (p.equals(dest)) {
+                    System.out.println(p.move);
+                    return;
+                }
+
+                moves.add(p);
+            }
+        }
     }
 
     public static List<Point> nextMoves(Point p, int n, boolean[][] blocked, boolean[][] visited) {
@@ -44,7 +58,7 @@ public class CastleGrid {
             }
 
             if (!visited[i][p.y]) {
-                Point p2 = new Point(i, p.y);
+                Point p2 = new Point(i, p.y, p.move + 1);
                 visited[i][p.y] = true;
                 result.add(p2);
             }
@@ -56,7 +70,7 @@ public class CastleGrid {
             }
 
             if (!visited[i][p.y]) {
-                Point p2 = new Point(i, p.y);
+                Point p2 = new Point(i, p.y, p.move + 1);
                 visited[i][p.y] = true;
                 result.add(p2);
             }
@@ -68,7 +82,7 @@ public class CastleGrid {
             }
 
             if (!visited[p.x][i]) {
-                Point p2 = new Point(p.x, i);
+                Point p2 = new Point(p.x, i, p.move + 1);
                 visited[p.x][i] = true;
                 result.add(p2);
             }
@@ -80,7 +94,7 @@ public class CastleGrid {
             }
 
             if (!visited[p.x][i]) {
-                Point p2 = new Point(p.x, i);
+                Point p2 = new Point(p.x, i, p.move + 1);
                 visited[p.x][i] = true;
                 result.add(p2);
             }
@@ -94,10 +108,10 @@ public class CastleGrid {
         int y;
         int move;
 
-        public Point(int x, int y) {
+        public Point(int x, int y, int move) {
             this.x = x;
             this.y = y;
-            this.move = 0;
+            this.move = move;
         }
 
         @Override
