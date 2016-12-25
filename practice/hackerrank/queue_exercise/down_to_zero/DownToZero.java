@@ -13,8 +13,7 @@ public class DownToZero {
 
         for (int i = 0; i < q; i++) {
             int n = scanner.nextInt();
-            Set<Integer> candidates = getCandidates(n, factorMap);
-            System.out.println("done");
+            System.out.println(solve(n, factorMap));
         }
 
     }
@@ -38,7 +37,7 @@ public class DownToZero {
                 break;
             }
 
-            Set<Integer> set = getCandidates(n, factorMap);
+            Set<Integer> set = reduce(l.a, factorMap);
 
             for (int i : set) {
                 if (!seen.containsKey(i)) {
@@ -55,7 +54,7 @@ public class DownToZero {
         return result;
     }
 
-    public static Set<Integer> getCandidates(int n, Map<Integer, Entry> factorMap) {
+    public static Set<Integer> reduce(int n, Map<Integer, Entry> factorMap) {
         List<Integer> primeFactors = new ArrayList<>();
 
         Entry e = factorMap.get(n);
