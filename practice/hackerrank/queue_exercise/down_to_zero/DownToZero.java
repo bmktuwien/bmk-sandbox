@@ -13,8 +13,10 @@ public class DownToZero {
 
         for (int i = 0; i < q; i++) {
             int n = scanner.nextInt();
-            System.out.println(solve(n, factorMap));
+            Set<Integer> candidates = getCandidates(n, factorMap);
+            System.out.println("done");
         }
+
     }
 
     public static int solve(int n, Map<Integer, Entry> factorMap) {
@@ -36,30 +38,7 @@ public class DownToZero {
                 break;
             }
 
-            List<Integer> primeFactors = new ArrayList<>();
-
-            Entry e = factorMap.get(l.a);
-            do {
-                primeFactors.add(e.a);
-                e = factorMap.get(e.b);
-            } while (e != null);
-
-
-            Set<Integer> set = new HashSet<>();
-            for (int j = 1; j < (1 << primeFactors.size()) - 1; j++) {
-                int f0 = 1;
-                int f1 = 1;
-
-                for (int k = 0; k < primeFactors.size(); k++) {
-                    if ((j >> k & 1) == 1) {
-                        f1 *= primeFactors.get(k);
-                    } else {
-                        f0 *= primeFactors.get(k);
-                    }
-                }
-
-                set.add(Math.max(f0, f1));
-            }
+            Set<Integer> set = getCandidates(n, factorMap);
 
             for (int i : set) {
                 if (!seen.containsKey(i)) {
@@ -74,6 +53,35 @@ public class DownToZero {
 
 
         return result;
+    }
+
+    public static Set<Integer> getCandidates(int n, Map<Integer, Entry> factorMap) {
+        List<Integer> primeFactors = new ArrayList<>();
+
+        Entry e = factorMap.get(n);
+        do {
+            primeFactors.add(e.a);
+            e = factorMap.get(e.b);
+        } while (e != null);
+
+
+        Set<Integer> set = new HashSet<>();
+        for (int j = 1; j < (1 << primeFactors.size()) - 1; j++) {
+            int f0 = 1;
+            int f1 = 1;
+
+            for (int k = 0; k < primeFactors.size(); k++) {
+                if ((j >> k & 1) == 1) {
+                    f1 *= primeFactors.get(k);
+                } else {
+                    f0 *= primeFactors.get(k);
+                }
+            }
+
+            set.add(Math.max(f0, f1));
+        }
+
+        return set;
     }
 
     public static Map<Integer, Entry> factorMap() {
