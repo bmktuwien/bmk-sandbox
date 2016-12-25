@@ -1,31 +1,23 @@
 import java.util.*;
 
-/**
- * Created by bmk on 12/24/16.
- */
+
 public class DownToZero {
 
-    public static void main(String[] args) {
-        Map<Integer, Entry> factorMap = factorMap();
+    private static Map<Integer, Set<Integer>> reduceMemoization = new HashMap<>();
 
-        /*Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) {
+        Entry[] factorMap = factorMap();
+
+        Scanner scanner = new Scanner(System.in);
         int q = scanner.nextInt();
 
         for (int i = 0; i < q; i++) {
             int n = scanner.nextInt();
             System.out.println(solve(n, factorMap));
-            System.out.println(solve2(n, factorMap));
-        }*/
-
-        for (int i = 0; i < 1000; i++) {
-            if (solve(i, factorMap) != solve2(i, factorMap)) {
-                System.out.println(i);
-            }
         }
-
     }
 
-    public static int solve(int n, Map<Integer, Entry> factorMap) {
+    public static int solve(int n, Entry[] factorMap) {
         Queue<Entry> queue = new LinkedList<>();
         queue.add(new Entry(n, 0));
         int result = 0;
@@ -46,62 +38,39 @@ public class DownToZero {
 
             Set<Integer> set = reduce(l.a, factorMap);
 
-            for (int i : set) {
-                if (!seen.containsKey(i)) {
-                    queue.add(new Entry(i, l.b + 1));
-                    seen.put(i, true);
+            if (!set.isEmpty()) {
+                for (int i : set) {
+                    if (!seen.containsKey(i)) {
+                        queue.add(new Entry(i, l.b + 1));
+                        seen.put(i, true);
+                    }
                 }
             }
 
             queue.add(new Entry(l.a - 1, l.b + 1));
             seen.put(l.a - 1, true);
-        }
 
-
-        return result;
-    }
-
-    public static int solve2(int n, Map<Integer, Entry> factorMap) {
-        Queue<Entry> queue = new LinkedList<>();
-        queue.add(new Entry(n, 0));
-        int result = 0;
-
-        if (n == 0) {
-            return 0;
-        }
-
-        while (!queue.isEmpty()) {
-            Entry l = queue.remove();
-
-            if (l.a == 1) {
-                result = 1 + l.b;
+            if (l.a - 1 == 1) {
+                result = l.b + 2;
                 break;
             }
-
-            Set<Integer> set = reduce(l.a, factorMap);
-
-            if (set.size() > 0) {
-                ArrayList<Integer> list = new ArrayList<>(set);
-                Collections.sort(list);
-
-                for (int i = 0; i < Math.min(4, list.size()); i++) {
-                    queue.add(new Entry(list.get(i), l.b + 1));
-                }
-            }
-
-            queue.add(new Entry(l.a - 1, l.b + 1));
         }
 
         return result;
     }
 
-    public static Set<Integer> reduce(int n, Map<Integer, Entry> factorMap) {
+    public static Set<Integer> reduce(int n, Entry[] factorMap) {
+        if (reduceMemoization.containsKey(n)) {
+            return reduceMemoization.get(n);
+        }
+
+
         List<Integer> primeFactors = new ArrayList<>();
 
-        Entry e = factorMap.get(n);
+        Entry e = factorMap[n];
         do {
             primeFactors.add(e.a);
-            e = factorMap.get(e.b);
+            e = factorMap[e.b];
         } while (e != null);
 
 
@@ -121,16 +90,18 @@ public class DownToZero {
             set.add(Math.max(f0, f1));
         }
 
+        reduceMemoization.put(n, set);
+
         return set;
     }
 
-    public static Map<Integer, Entry> factorMap() {
-        Map<Integer, Entry> map = new HashMap<>();
+    public static Entry[] factorMap() {
+        Entry[] map = new Entry[1000001];
 
         for (int i = 2; i <= 1000000; i++) {
-            if (!map.containsKey(i)) {
+            if (map[i] == null) {
                 for (int j = 1; i * j <= 1000000; j++) {
-                    map.put(i * j, new Entry(i, j));
+                    map[i * j] = new Entry(i, j);
                 }
             }
         }
