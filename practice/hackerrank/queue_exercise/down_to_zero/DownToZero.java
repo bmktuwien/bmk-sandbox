@@ -18,17 +18,18 @@ public class DownToZero {
     }
 
     public static int solve(int n, Map<Integer, Entry> factorMap) {
-            Queue<Entry> queue = new LinkedList<>();
+        Queue<Entry> queue = new LinkedList<>();
         queue.add(new Entry(n, 0));
         int result = 0;
 
+        if (n == 0) {
+            return 0;
+        }
+
+        Map<Integer, Boolean> seen = new HashMap<>();
+
         while (!queue.isEmpty()) {
             Entry l = queue.remove();
-
-            if (l.a == 0) {
-                result = 0;
-                break;
-            }
 
             if (l.a == 1) {
                 result = 1 + l.b;
@@ -61,11 +62,16 @@ public class DownToZero {
             }
 
             for (int i : set) {
-                queue.add(new Entry(i, l.b + 1));
+                if (!seen.containsKey(i)) {
+                    queue.add(new Entry(i, l.b + 1));
+                    seen.put(i, true);
+                }
             }
 
             queue.add(new Entry(l.a - 1, l.b + 1));
+            seen.put(l.a - 1, true);
         }
+
 
         return result;
     }
