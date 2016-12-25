@@ -8,12 +8,19 @@ public class DownToZero {
     public static void main(String[] args) {
         Map<Integer, Entry> factorMap = factorMap();
 
-        Scanner scanner = new Scanner(System.in);
+        /*Scanner scanner = new Scanner(System.in);
         int q = scanner.nextInt();
 
         for (int i = 0; i < q; i++) {
             int n = scanner.nextInt();
             System.out.println(solve(n, factorMap));
+            System.out.println(solve2(n, factorMap));
+        }*/
+
+        for (int i = 0; i < 1000; i++) {
+            if (solve(i, factorMap) != solve2(i, factorMap)) {
+                System.out.println(i);
+            }
         }
 
     }
@@ -50,6 +57,40 @@ public class DownToZero {
             seen.put(l.a - 1, true);
         }
 
+
+        return result;
+    }
+
+    public static int solve2(int n, Map<Integer, Entry> factorMap) {
+        Queue<Entry> queue = new LinkedList<>();
+        queue.add(new Entry(n, 0));
+        int result = 0;
+
+        if (n == 0) {
+            return 0;
+        }
+
+        while (!queue.isEmpty()) {
+            Entry l = queue.remove();
+
+            if (l.a == 1) {
+                result = 1 + l.b;
+                break;
+            }
+
+            Set<Integer> set = reduce(l.a, factorMap);
+
+            if (set.size() > 0) {
+                ArrayList<Integer> list = new ArrayList<>(set);
+                Collections.sort(list);
+
+                for (int i = 0; i < Math.min(4, list.size()); i++) {
+                    queue.add(new Entry(list.get(i), l.b + 1));
+                }
+            }
+
+            queue.add(new Entry(l.a - 1, l.b + 1));
+        }
 
         return result;
     }
