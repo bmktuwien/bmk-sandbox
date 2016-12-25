@@ -7,33 +7,44 @@ public class DownToZero {
 
     public static void main(String[] args) {
         Map<Integer, Entry> factorMap = factorMap();
-        int[] minMap = minMap(factorMap);
 
         Scanner scanner = new Scanner(System.in);
         int q = scanner.nextInt();
 
         for (int i = 0; i < q; i++) {
             int n = scanner.nextInt();
-            System.out.println(minMap[n]);
+            System.out.println(solve(n, factorMap));
         }
     }
 
-    public static int[] minMap(Map<Integer, Entry> factorMap) {
-        int[] map = new int[1000000];
-        map[0] = 0;
-        map[1] = 1;
+    public static int solve(int n, Map<Integer, Entry> factorMap) {
+            Queue<Entry> queue = new LinkedList<>();
+        queue.add(new Entry(n, 0));
+        int result = 0;
 
-        for (int i = 2; i < map.length; i++) {
+        while (!queue.isEmpty()) {
+            Entry l = queue.remove();
+
+            if (l.a == 0) {
+                result = 0;
+                break;
+            }
+
+            if (l.a == 1) {
+                result = 1 + l.b;
+                break;
+            }
+
             List<Integer> primeFactors = new ArrayList<>();
 
-            Entry e = factorMap.get(i);
+            Entry e = factorMap.get(l.a);
             do {
                 primeFactors.add(e.a);
                 e = factorMap.get(e.b);
             } while (e != null);
 
-            int min = map[i - 1];
 
+            Set<Integer> set = new HashSet<>();
             for (int j = 1; j < (1 << primeFactors.size()) - 1; j++) {
                 int f0 = 1;
                 int f1 = 1;
@@ -46,16 +57,17 @@ public class DownToZero {
                     }
                 }
 
-                int t = map[Math.max(f0, f1)];
-                if (t < min) {
-                    min = t;
-                }
+                set.add(Math.max(f0, f1));
             }
 
-            map[i] = min + 1;
+            for (int i : set) {
+                queue.add(new Entry(i, l.b + 1));
+            }
+
+            queue.add(new Entry(l.a - 1, l.b + 1));
         }
 
-        return map;
+        return result;
     }
 
     public static Map<Integer, Entry> factorMap() {
