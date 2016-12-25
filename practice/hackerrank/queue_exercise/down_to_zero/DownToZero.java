@@ -26,7 +26,7 @@ public class DownToZero {
             return 0;
         }
 
-        Map<Integer, Boolean> seen = new HashMap<>();
+        boolean[] seen = new boolean[1000001];
 
         while (!queue.isEmpty()) {
             Entry l = queue.remove();
@@ -40,15 +40,17 @@ public class DownToZero {
 
             if (!set.isEmpty()) {
                 for (int i : set) {
-                    if (!seen.containsKey(i)) {
+                    if (!seen[i]) {
                         queue.add(new Entry(i, l.b + 1));
-                        seen.put(i, true);
+                        seen[i] = true;
                     }
                 }
             }
 
-            queue.add(new Entry(l.a - 1, l.b + 1));
-            seen.put(l.a - 1, true);
+            if (!seen[l.a-1]) {
+                queue.add(new Entry(l.a - 1, l.b + 1));
+                seen[l.a - 1] = true;
+            }
 
             if (l.a - 1 == 1) {
                 result = l.b + 2;
@@ -101,6 +103,21 @@ public class DownToZero {
             if (map[i] == null) {
                 for (int j = 1; i * j <= 1000000; j++) {
                     map[i * j] = new Entry(i, j);
+                }
+            }
+        }
+
+        return map;
+    }
+
+    // unbelievable slow
+    public static Map<Integer, Entry> factorMap2() {
+        Map<Integer, Entry> map = new HashMap<>();
+
+        for (int i = 2; i <= 1000000; i++) {
+            if (!map.containsKey(i)) {
+                for (int j = 1; i * j <= 1000000; j++) {
+                    map.put(i * j, new Entry(i, j));
                 }
             }
         }
