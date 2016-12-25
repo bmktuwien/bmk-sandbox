@@ -64,7 +64,6 @@ public class DownToZero {
             return reduceMemoization.get(n);
         }
 
-
         List<Integer> primeFactors = new ArrayList<>();
 
         Entry e = factorMap[n];
