@@ -10,48 +10,66 @@ public class FixedLengthQueries {
         Scanner scanner = new Scanner(System.in);
 
         int n = scanner.nextInt();
-        int d = scanner.nextInt();
+        int q = scanner.nextInt();
 
         int[] input = new int[n];
         for (int i = 0; i < n; i++) {
             input[i] = scanner.nextInt();
         }
 
-        solveQuery(d, input);
+        for (int i = 0; i < q; i++) {
+            int d = scanner.nextInt();
+            solveQuery(d, input);
+        }
     }
 
     public static void solveQuery(int d, int[] input) {
-        ArrayList<Integer> result = new ArrayList<>();
-        int[] tmp = new int[d-1];
+        ArrayList<Integer> maxs = new ArrayList<>();
 
-        int k = d-1;
-        while (k < input.length) {
-            int max = -1;
-            for (int i = 0; i < tmp.length; i++) {
-                if (input[k-i-1] > max) {
-                    max = input[k-i-1];
-                }
-
-                tmp[i] = max;
+        if (d == 1) {
+            for (int i : input) {
+                maxs.add(i);
             }
+        } else {
+            int[] tmp = new int[d - 1];
 
+            int k = d - 1;
+            while (k < input.length) {
+                int max = -1;
+                for (int i = 0; i < tmp.length; i++) {
+                    if (input[k - i - 1] > max) {
+                        max = input[k - i - 1];
+                    }
 
-            max = -1;
-            for (int i = 0; k+i < input.length && i < d-1; i++) {
-                if (input[k+i] > max) {
-                    max = input[k+i];
+                    tmp[i] = max;
                 }
 
-                if (tmp[tmp.length-1-i] > max) {
-                    result.add(tmp[tmp.length-1-i]);
-                } else {
-                    result.add(max);
+
+                max = -1;
+                for (int i = 0; k + i < input.length && i < d - 1; i++) {
+                    if (input[k + i] > max) {
+                        max = input[k + i];
+                    }
+
+                    if (tmp[tmp.length - 1 - i] > max) {
+                        maxs.add(tmp[tmp.length - 1 - i]);
+                    } else {
+                        maxs.add(max);
+                    }
                 }
+
+                k += d - 1;
             }
-
-            k += d-1;
         }
 
-        System.out.println("done");
+
+        int min = Integer.MAX_VALUE;
+        for (int i : maxs) {
+            if (i < min) {
+                min = i;
+            }
+        }
+
+        System.out.println(min);
     }
 }
