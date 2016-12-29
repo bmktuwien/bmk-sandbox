@@ -136,6 +136,8 @@ public class SubsequenceWeighting {
                 for (Long k : keys) {
                     if (map.get(k).compareTo(wSum) <= 0) {
                         toRemove.add(k);
+                    } else {
+                        break;
                     }
                 }
 
