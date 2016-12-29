@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by bmk on 12/29/16.
@@ -15,8 +12,8 @@ public class SubsequenceWeighting {
 
         for (int i = 0; i < t; i++) {
             int n = scanner.nextInt();
-            long[] a = new long[n];
-            long[] w = new long[n];
+            Long[] a = new Long[n];
+            Long[] w = new Long[n];
             for (int j = 0; j < n; j++) {
                 a[j] = scanner.nextLong();
             }
@@ -102,7 +99,7 @@ public class SubsequenceWeighting {
         return max;
     }
 
-    public static long solve(long[] a, long[] w) {
+    public static long solve(Long[] a, Long[] w) {
         TreeMap<Long, Long> map = new TreeMap<>();
 
         for (int i = 0; i < a.length; i++) {
@@ -113,7 +110,7 @@ public class SubsequenceWeighting {
                 wSum = w[i];
                 map.put(a[i], w[i]);
             } else {
-                if (key != a[i]) {
+                if (!key.equals(a[i])) {
                     wSum = map.get(key) + w[i];
                     map.put(a[i], wSum);
                 } else {
@@ -132,16 +129,20 @@ public class SubsequenceWeighting {
                 }
             }
 
-            int cnt = 0;
             if (wSum > 0) {
-                for (Long k : new ArrayList<>(map.tailMap(a[i], false).keySet())) {
+                ArrayList<Long> toRemove = new ArrayList<>();
+                Set<Long> keys =  map.tailMap(a[i], false).keySet();
+
+                for (Long k : keys) {
                     if (map.get(k).compareTo(wSum) <= 0) {
-                        map.remove(k);
+                        toRemove.add(k);
                     }
-                    cnt++;
+                }
+
+                for (Long k : toRemove) {
+                    map.remove(k);
                 }
             }
-            System.out.println(cnt);
         }
 
         long max = map.lastEntry().getValue();
