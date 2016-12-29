@@ -132,13 +132,16 @@ public class SubsequenceWeighting {
                 }
             }
 
+            int cnt = 0;
             if (wSum > 0) {
                 for (Long k : new ArrayList<>(map.tailMap(a[i], false).keySet())) {
-                    if (map.get(k) <= wSum) {
+                    if (map.get(k).compareTo(wSum) <= 0) {
                         map.remove(k);
                     }
+                    cnt++;
                 }
             }
+            System.out.println(cnt);
         }
 
         long max = map.lastEntry().getValue();
