@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -25,62 +26,124 @@ public class SubsequenceWeighting {
 
             solve(a, w);
         }
+
+        /*Random r = new Random();
+        while (true) {
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            long[] a = new long[10];
+            long[] w = new long[10];
+
+            for (int i = 0; i < a.length; i++) {
+                a[i] = r.nextInt(20);
+                w[i] = r.nextInt(1000);
+            }
+
+            for (long l : a) {
+                System.out.print(l + " ");
+            }
+            System.out.println();
+            for (long l : w) {
+                System.out.print(l + " ");
+            }
+            System.out.println();
+
+
+            long max1 = solve(a, w);
+            long max2 = bruteForce(a, w);
+
+            if (max1 != max2) {
+                break;
+            }
+        }*/
     }
 
-    public static void solve(long[] a, long[] w) {
-        TreeMap<Long, Entry> map = new TreeMap<>();
+    public static long bruteForce(long[] a, long[] w) {
+        ArrayList<Long> result = null;
+        long max = 0;
+
+        for (int j = 0; j < (1 << a.length); j++) {
+            ArrayList<Long> subA = new ArrayList<>();
+            ArrayList<Long> subW = new ArrayList<>();
+
+            for (int k = 0; k < a.length; k++) {
+                if ((j >> k & 1) == 1) {
+                    subA.add(a[k]);
+                    subW.add(w[k]);
+                }
+            }
+
+            long sum = 0;
+            long tmp = -1;
+            boolean invalid = false;
+            for (int i = 0; i< subA.size(); i++) {
+                if (subA.get(i) <= tmp) {
+                    invalid = true;
+                    break;
+                }
+
+                tmp = subA.get(i);
+                sum += subW.get(i);
+            }
+
+            if (!invalid) {
+                if (sum > max) {
+                    max = sum;
+                    result = subA;
+                }
+            }
+        }
+
+        System.out.println(max);
+        for (long l : result) {
+            System.out.print(l + " ");
+        }
+        System.out.println();
+
+        return max;
+    }
+
+    public static long solve(long[] a, long[] w) {
+        TreeMap<Long, Long> map = new TreeMap<>();
 
         for (int i = 0; i < a.length; i++) {
             Long key = map.floorKey(a[i]);
+            Long wSum = -1L;
 
             if (key == null) {
-                Entry e = new Entry();
-                e.wSum = w[i];
-                e.lastWeight = w[i];
-                map.put(a[i], e);
+                wSum = w[i];
+                map.put(a[i], w[i]);
             } else {
-                Entry e = map.get(key);
-
                 if (key != a[i]) {
-                    Entry newE = new Entry();
-                    newE.wSum = e.wSum + w[i];
-                    newE.lastWeight = w[i];
-                    map.put(a[i], newE);
-
-                    // cleanup higher keys
-                    for (Long k : new ArrayList<>(map.tailMap(a[i], false).keySet())) {
-                        if (map.get(k).wSum <= newE.wSum) {
-                            map.remove(k);
-                        }
-                    }
+                    wSum = map.get(key) + w[i];
+                    map.put(a[i], wSum);
                 } else {
-                    if (w[i] > e.lastWeight) {
-                        e.wSum = e.wSum - e.lastWeight + w[i];
-                        e.lastWeight = w[i];
-                    }
-
-                    // cleanup higher keys
-                    for (Long k : new ArrayList<>(map.tailMap(a[i], false).keySet())) {
-                        if (map.get(k).wSum <= e.wSum) {
-                            map.remove(k);
+                    Long lowerKey = map.lowerKey(a[i]);
+                    if (lowerKey != null) {
+                        if (map.get(lowerKey) + w[i] > map.get(key)) {
+                            wSum = map.get(lowerKey) + w[i];
+                            map.put(key, wSum);
                         }
+                    } else {
+                        if (map.get(key) < w[i]) {
+                            wSum = w[i];
+                            map.put(key, wSum);
+                        }
+                    }
+                }
+            }
+
+            if (wSum > 0) {
+                for (Long k : new ArrayList<>(map.tailMap(a[i], false).keySet())) {
+                    if (map.get(k) <= wSum) {
+                        map.remove(k);
                     }
                 }
             }
         }
 
-        long max = 0;
-        for (Entry e : map.values()) {
-            if (e.wSum > max) {
-                max = e.wSum;
-            }
-        }
+        long max = map.lastEntry().getValue();
 
         System.out.println(max);
-    }
-
-    public static class Entry {
-        long wSum;
-        long lastWeight;
+        return max;
     }
 }
