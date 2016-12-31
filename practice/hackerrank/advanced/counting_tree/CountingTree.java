@@ -10,13 +10,49 @@ public class CountingTree {
 
     public static void main(String[] args) {
         int n = scanner.nextInt();
+        int q = scanner.nextInt();
         readTree(n);
 
-        List<Node> path1 = findPath(8, 0);
-        System.out.println(path1.size());
+        for (int i = 0; i < q; i++) {
+            int x1 = scanner.nextInt() - 1;
+            int y1 = scanner.nextInt() - 1;
+            int x2 = scanner.nextInt() - 1;
+            int y2 = scanner.nextInt() - 1;
+
+            solve(x1, y1, x2, y2);
+        }
     }
 
-    public static List<Node> findPath (int id1, int id2) {
+    public static void solve(int x1, int y1, int x2, int y2) {
+        List<Node> path1 = findPath(x1, y1);
+        List<Node> path2 = findPath(x2, y2);
+
+        int cnt = 0;
+        Map<Long, HashSet<Integer>> map = new HashMap<>();
+
+        for (Node n : path1) {
+            if (map.containsKey(n.data)) {
+                map.get(n.data).add(n.id);
+            } else {
+                HashSet<Integer> s = new HashSet<>();
+                s.add(n.id);
+                map.put(n.data, s);
+            }
+        }
+
+        for (Node n: path2) {
+            if (map.containsKey(n.data)) {
+                cnt += map.get(n.data).size();
+
+                if (map.get(n.data).contains(n.id)) {
+                    cnt--;
+                }
+            }
+        }
+
+        System.out.println(cnt);
+    }
+    public static List<Node> findPath(int id1, int id2) {
         Node n1 = nodes[id1];
         Node n2 = nodes[id2];
 
