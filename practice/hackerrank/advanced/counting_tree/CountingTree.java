@@ -8,6 +8,8 @@ public class CountingTree {
     private static Scanner scanner = new Scanner(System.in);
     private static Node[] nodes;
 
+    static long tick = 0;
+
     public static void main(String[] args) {
         int n = scanner.nextInt();
         int q = scanner.nextInt();
@@ -21,13 +23,14 @@ public class CountingTree {
 
             solve(x1, y1, x2, y2);
         }
+        System.out.println(tick);
     }
 
     public static void solve(int x1, int y1, int x2, int y2) {
         List<Node> path1 = findPath(x1, y1);
         List<Node> path2 = findPath(x2, y2);
 
-        int cnt = 0;
+        /*int cnt = 0;
         Map<Long, HashSet<Integer>> map = new HashMap<>();
 
         for (Node n : path1) {
@@ -50,7 +53,7 @@ public class CountingTree {
             }
         }
 
-        System.out.println(cnt);
+        System.out.println(cnt);*/
     }
 
     public static List<Node> findPath(int id1, int id2) {
@@ -69,7 +72,6 @@ public class CountingTree {
                 n2 = n2.parent;
             }
         }
-
 
         while (n1 != n2) {
             path.add(n1);
