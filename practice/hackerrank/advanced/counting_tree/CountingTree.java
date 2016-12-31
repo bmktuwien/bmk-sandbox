@@ -52,21 +52,22 @@ public class CountingTree {
 
         System.out.println(cnt);
     }
+
     public static List<Node> findPath(int id1, int id2) {
         Node n1 = nodes[id1];
         Node n2 = nodes[id2];
 
         List<Node> path = new ArrayList<>();
-        Map<Integer, Boolean> seen = new HashMap<>();
+        boolean[] seen = new boolean[100000];
 
         Node tmp = n1;
         while (tmp != null) {
-            seen.put(tmp.id, true);
+            seen[tmp.id] = true;
             tmp = tmp.parent;
         }
 
         while (n2 != null) {
-            if (!seen.containsKey(n2.id)) {
+            if (!seen[n2.id]) {
                 path.add(n2);
                 n2 = n2.parent;
             } else {
