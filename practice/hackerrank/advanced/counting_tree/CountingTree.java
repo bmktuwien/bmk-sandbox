@@ -46,7 +46,7 @@ public class CountingTree {
             }
         }
 
-        for (Node n: path2) {
+        for (Node n : path2) {
             if (map.containsKey(n.data)) {
                 cnt += map.get(n.data).size();
 
