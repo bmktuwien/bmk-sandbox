@@ -27,6 +27,12 @@ public class CountingTree {
         List<Node> path1 = findPath(x1, y1);
         List<Node> path2 = findPath(x2, y2);
 
+        if (path1.size() > path2.size()) {
+            List<Node> tmp = path1;
+            path1 = path2;
+            path2 = tmp;
+        }
+
         int cnt = 0;
         Map<Long, HashSet<Integer>> map = new HashMap<>();
 
