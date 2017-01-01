@@ -19,85 +19,83 @@ public class CountingTree {
             int x2 = scanner.nextInt() - 1;
             int y2 = scanner.nextInt() - 1;
 
-            solve(x1, y1, x2, y2);
+            solve(x1, y1, x2, y2, i);
         }
     }
 
-    public static void solve(int x1, int y1, int x2, int y2) {
-        List<Node> path1 = findPath(x1, y1);
-        List<Node> path2 = findPath(x2, y2);
-
-        if (path1.size() > path2.size()) {
-            List<Node> tmp = path1;
-            path1 = path2;
-            path2 = tmp;
-        }
-
-        int cnt = 0;
-        Map<Long, HashSet<Integer>> map = new HashMap<>();
-
-        for (Node n : path1) {
-            if (map.containsKey(n.data)) {
-                map.get(n.data).add(n.id);
-            } else {
-                HashSet<Integer> s = new HashSet<>();
-                s.add(n.id);
-                map.put(n.data, s);
-            }
-        }
-
-        for (Node n : path2) {
-            if (map.containsKey(n.data)) {
-                cnt += map.get(n.data).size();
-
-                if (map.get(n.data).contains(n.id)) {
-                    cnt--;
-                }
-            }
-        }
+    public static void solve(int x1, int y1, int x2, int y2, int run) {
+        markPath(x1, y1, run);
+        int cnt = countPath(x2, y2, run);
 
         System.out.println(cnt);
     }
 
-    public static List<Node> findPath(int id1, int id2) {
+    public static void markPath(int id1, int id2, int run) {
         Node n1 = nodes[id1];
         Node n2 = nodes[id2];
-        List<Node> path = new ArrayList<>();
 
         if (n1.height > n2.height) {
             while (n1.height != n2.height) {
-                if (!n1.unique) {
-                    path.add(n1);
-                }
+                n1.run = run;
                 n1 = n1.parent;
             }
         } else if (n2.height > n1.height) {
             while (n1.height != n2.height) {
-                if (!n2.unique) {
-                    path.add(n2);
-                }
+                n2.run = run;
                 n2 = n2.parent;
             }
         }
 
         while (n1 != n2) {
-            if (!n1.unique) {
-                path.add(n1);
-            }
-
-            if (!n2.unique) {
-                path.add(n2);
-            }
+            n1.run = run;
+            n2.run = run;
 
             n1 = n1.parent;
             n2 = n2.parent;
         }
 
-        if (!n1.unique) {
-            path.add(n1);
+        n1.run = run;
+    }
+
+    public static int countDuplicates(Node n, int run) {
+        int cnt = 0;
+
+        for (Node dup : n.duplicates) {
+            if (dup.run == run) {
+                cnt++;
+            }
         }
 
-        return path;
+        return cnt;
+    }
+    public static int countPath(int id1, int id2, int run) {
+        int cnt = 0;
+        Node n1 = nodes[id1];
+        Node n2 = nodes[id2];
+
+        if (n1.height > n2.height) {
+            while (n1.height != n2.height) {
+                cnt += countDuplicates(n1, run);
+                n1 = n1.parent;
+            }
+        } else if (n2.height > n1.height) {
+            while (n1.height != n2.height) {
+                cnt += countDuplicates(n2, run);
+                n2 = n2.parent;
+            }
+        }
+
+        while (n1 != n2) {
+            cnt += countDuplicates(n1, run);
+            cnt += countDuplicates(n2, run);
+
+            n1 = n1.parent;
+            n2 = n2.parent;
+        }
+
+        cnt += countDuplicates(n1, run);
+
+        return cnt;
     }
 
     public static void readTree(int n) {
@@ -144,14 +142,22 @@ public class CountingTree {
             nextLvlNodes = l;
         }
 
-        Map<Long, Integer> map = new HashMap<>();
+        Map<Long, HashSet<Node>> map = new HashMap<>();
         for (Node node : nodes) {
-            map.put(node.data, map.getOrDefault(node.data, 0) + 1);
+            if (map.containsKey(node.data)) {
+                map.get(node.data).add(node);
+            } else {
+                HashSet<Node> set = new HashSet<>();
+                set.add(node);
+                map.put(node.data, set);
+            }
         }
 
-        for (Node node : nodes) {
-            if (map.get(node.data) < 2) {
-                node.unique = true;
+        for (HashSet<Node> duplicates : map.values()) {
+            for (Node node : duplicates) {
+                for (Node dup : duplicates) {
+                    node.addDuplicate(dup);
+                }
             }
         }
     }
@@ -160,8 +166,9 @@ public class CountingTree {
         final int id;
         final long data;
         int height;
-        boolean unique;
+        int run;
         Node parent;
+        List<Node> duplicates;
         HashSet<Node> children;
 
         public Node(int id, long data) {
@@ -170,7 +177,14 @@ public class CountingTree {
             this.parent = null;
             this.height = 0;
             this.children = new HashSet<>();
-            this.unique = false;
+            this.duplicates = new ArrayList<>();
+            this.run = -1;
+        }
+
+        public void addDuplicate(Node node) {
+            if (node != this) {
+                duplicates.add(node);
+            }
         }
 
         public void addChild(Node child) {
