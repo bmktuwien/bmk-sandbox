@@ -7,6 +7,10 @@ public class CountingTree {
 
     private static Scanner scanner = new Scanner(System.in);
     private static Node[] nodes;
+    private static int[] heights;
+    private static int[] parents;
+    private static int[] runMarks;
+    private static int[][] duplicates;
 
     public static void main(String[] args) {
         int n = scanner.nextInt();
@@ -19,7 +23,7 @@ public class CountingTree {
             int x2 = scanner.nextInt() - 1;
             int y2 = scanner.nextInt() - 1;
 
-            solve(x1, y1, x2, y2, i);
+            solve(x1, y1, x2, y2, i+1);
         }
     }
 
@@ -31,38 +35,43 @@ public class CountingTree {
     }
 
     public static void markPath(int id1, int id2, int run) {
-        Node n1 = nodes[id1];
-        Node n2 = nodes[id2];
+        int n1 = id1;
+        int n2 = id2;
 
-        if (n1.height > n2.height) {
-            while (n1.height != n2.height) {
-                n1.run = run;
-                n1 = n1.parent;
+        int h1 = heights[n1];
+        int h2 = heights[n2];
+
+        if (h1 > h2) {
+            while (h1 != h2) {
+                runMarks[n1] = run;
+                n1 = parents[n1];
+                h1--;
             }
-        } else if (n2.height > n1.height) {
-            while (n1.height != n2.height) {
-                n2.run = run;
-                n2 = n2.parent;
+        } else if (h2 > h1) {
+            while (h1 != h2) {
+                runMarks[n2] = run;
+                n2 = parents[n2];
+                h2--;
             }
         }
 
         while (n1 != n2) {
-            n1.run = run;
-            n2.run = run;
+            runMarks[n1] = run;
+            runMarks[n2] = run;
 
-            n1 = n1.parent;
-            n2 = n2.parent;
+            n1 = parents[n1];
+            n2 = parents[n2];
         }
 
-        n1.run = run;
+        runMarks[n1] = run;
     }
 
-    public static int countDuplicates(Node n, int run) {
+    public static int countDuplicates(int nodeId, int run) {
         int cnt = 0;
 
-        if (n.duplicates != null) {
-            for (Node dup : n.duplicates) {
-                if (dup.run == run) {
+        if (duplicates[nodeId] != null) {
+            for (int dup : duplicates[nodeId]) {
+                if (runMarks[dup] == run) {
                     cnt++;
                 }
             }
@@ -73,18 +82,23 @@ public class CountingTree {
 
     public static int countPath(int id1, int id2, int run) {
         int cnt = 0;
-        Node n1 = nodes[id1];
-        Node n2 = nodes[id2];
+        int n1 = id1;
+        int n2 = id2;
 
-        if (n1.height > n2.height) {
-            while (n1.height != n2.height) {
+        int h1 = heights[n1];
+        int h2 = heights[n2];
+
+        if (h1 > h2) {
+            while (h1 !=h2) {
                 cnt += countDuplicates(n1, run);
-                n1 = n1.parent;
+                n1 = parents[n1];
+                h1--;
             }
-        } else if (n2.height > n1.height) {
-            while (n1.height != n2.height) {
+        } else if (h2 > h1) {
+            while (h1 != h2) {
                 cnt += countDuplicates(n2, run);
-                n2 = n2.parent;
+                n2 = parents[n2];
+                h2--;
             }
         }
 
@@ -92,8 +106,8 @@ public class CountingTree {
             cnt += countDuplicates(n1, run);
             cnt += countDuplicates(n2, run);
 
-            n1 = n1.parent;
-            n2 = n2.parent;
+            n1 = parents[n1];
+            n2 = parents[n2];
         }
 
         cnt += countDuplicates(n1, run);
@@ -104,6 +118,11 @@ public class CountingTree {
     public static void readTree(int n) {
         // read nodes
         nodes = new Node[n];
+        heights = new int[n];
+        parents = new int[n];
+        runMarks = new int[n];
+        duplicates = new int[n][];
+
         for (int i = 0; i < n; i++) {
             long c = scanner.nextLong();
             nodes[i] = new Node(i, c);
@@ -117,6 +136,14 @@ public class CountingTree {
             Node parent = nodes[xId];
             Node child = nodes[yId];
             child.addParent(parent);
+        }
+
+        for (Node node : nodes) {
+            if (node.parent != null) {
+                parents[node.id] = node.parent.id;
+            } else {
+                parents[node.id] = -1;
+            }
         }
 
         // add children
@@ -137,7 +164,7 @@ public class CountingTree {
             List<Node> l = new ArrayList<>();
 
             for (Node node : nextLvlNodes) {
-                node.height = height;
+                heights[node.id] = height;
                 l.addAll(node.children);
             }
 
@@ -156,9 +183,19 @@ public class CountingTree {
             }
         }
 
-        for (HashSet<Node> duplicates : map.values()) {
-            for (Node node : duplicates) {
-                node.addDuplicates(duplicates);
+        for (HashSet<Node> dups : map.values()) {
+            for (Node node : dups) {
+                if (dups.size() > 1) {
+                    duplicates[node.id] = new int[dups.size() - 1];
+
+                    int i = 0;
+                    for (Node dup : dups) {
+                        if (dup != node) {
+                            duplicates[node.id][i] = dup.id;
+                            i++;
+                        }
+                    }
+                }
             }
         }
     }
@@ -166,36 +203,14 @@ public class CountingTree {
     public static class Node {
         final int id;
         final long data;
-        int height;
-        int run;
         Node parent;
-        Node[] duplicates;
         HashSet<Node> children;
 
         public Node(int id, long data) {
             this.id = id;
             this.data = data;
             this.parent = null;
-            this.height = 0;
             this.children = new HashSet<>();
-            this.duplicates = null;
-            this.run = -1;
-        }
-
-        public void addDuplicates(Collection<Node> nodes) {
-            if (nodes.size() > 1) {
-                if (duplicates == null) {
-                    duplicates = new Node[nodes.size() - 1];
-
-                    int i = 0;
-                    for (Node dup : nodes) {
-                        if (dup != this) {
-                            duplicates[i] = dup;
-                            i++;
-                        }
-                    }
-                }
-            }
         }
 
         public void addChild(Node child) {
