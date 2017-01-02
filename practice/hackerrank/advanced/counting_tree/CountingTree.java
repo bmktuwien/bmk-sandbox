@@ -234,10 +234,6 @@ public class CountingTree {
             }
 
             this.parent = parent;
-
-            while (parent != null) {
-                parent = parent.parent;
-            }
         }
     }
 }
