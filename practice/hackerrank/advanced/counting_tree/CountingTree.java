@@ -92,7 +92,6 @@ public class CountingTree {
                         copy.add(new DupParent(c, idx));
                         idx++;
 
-                        node.setDuplicatedParents(copy);
                         l.add(c);
                         p.add(copy);
                     }
