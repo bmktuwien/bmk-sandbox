@@ -11,9 +11,30 @@ public class KunduTree {
 
     public static void main(String[] args) {
         readTree();
-        System.out.println("Done");
+        long result = count();
+
+        System.out.println(result);
     }
 
+    public static long count() {
+        long result = 0;
+
+        for (Edge e : redEdges) {
+            Node c = e.getChildNode();
+
+            long n1 = totalCount - c.cnt;
+            long n2 = 0;
+
+            for (Node n : c.children) {
+                n2 += n.redCnt;
+            }
+
+            result += (n1 * n2);
+            result = result % MOD;
+        }
+
+        return result;
+    }
 
     public static void readTree() {
         int n = scanner.nextInt();
@@ -69,7 +90,7 @@ public class KunduTree {
             }
         }
 
-        /*Node root = null;
+        Node root = null;
         for (Node node : nodes) {
             if (node.parent != null) {
                 node.parent.addChild(node);
@@ -78,7 +99,7 @@ public class KunduTree {
             }
         }
 
-        return root;*/
+        //return root;
     }
 
     public static class Node {
