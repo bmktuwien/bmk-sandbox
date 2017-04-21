@@ -2,20 +2,48 @@ import java.util.*;
 
 public class KunduTree {
 
+    private static long MOD = 1000000000L + 7;
+    private static int totalCount = 0;
+
     private static Scanner scanner = new Scanner(System.in);
+    private static HashSet<Edge> redEdges = new HashSet<>();
 
     public static void main(String[] args) {
         Node root = readTree();
-        System.out.println(root.cnt);
+        long result = solve(root);
+        System.out.println(result);
     }
 
-    public static long solve() {
-        return -1;
+    public static long solve(Node root) {
+        return traverse(root, null, 0);
     }
 
+    public static long traverse(Node n, Node prevRed, long result) {
+        for (Node child : n.children) {
+            Edge e = Edge.createEdge(n.id, child.id);
+
+            if (redEdges.contains(e)) {
+                if (prevRed != null) {
+                    long n1 = totalCount - prevRed.cnt;
+                    long n2 = child.cnt;
+
+                    System.out.println(n1 * n2);
+                    result += (n1 * n2);
+                    result = result % MOD;
+                }
+
+                result = traverse(child, child, result);
+            } else {
+                result = traverse(child, prevRed, result);
+            }
+        }
+
+        return result;
+    }
 
     public static Node readTree() {
         int n = scanner.nextInt();
+        totalCount = n;
 
         // read nodes
         Node[] nodes = new Node[n];
@@ -28,9 +56,13 @@ public class KunduTree {
         for (int i = 0; i < n - 1; i++) {
             int xId = scanner.nextInt() - 1;
             int yId = scanner.nextInt() - 1;
-            scanner.next();
+            String color = scanner.next();
 
-            edges[i] = new Edge(xId, yId);
+            edges[i] = Edge.createEdge(xId, yId);
+
+            if (color.equals("r")) {
+                redEdges.add(edges[i]);
+            }
         }
 
         // build tree
@@ -102,9 +134,31 @@ public class KunduTree {
         final int xId;
         final int yId;
 
-        public Edge(int xId, int yId) {
+        private Edge(int xId, int yId) {
             this.xId = xId;
             this.yId = yId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Edge) {
+                Edge other = (Edge) o;
+                return xId == other.xId && yId == other.yId;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return xId * 31 + yId;
+        }
+
+        public static Edge createEdge(int xId, int yId) {
+            int xId1 = Math.min(xId, yId);
+            int yId1 = Math.max(xId, yId);
+
+            return new Edge(xId1, yId1);
         }
     }
 }
