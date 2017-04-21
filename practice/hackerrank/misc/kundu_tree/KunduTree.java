@@ -7,46 +7,20 @@ public class KunduTree {
 
     private static Scanner scanner = new Scanner(System.in);
     private static HashSet<Edge> redEdges = new HashSet<>();
+    private static Node[] nodes;
 
     public static void main(String[] args) {
-        Node root = readTree();
-        long result = solve(root);
-        System.out.println(result);
+        readTree();
+        System.out.println("Done");
     }
 
-    public static long solve(Node root) {
-        return traverse(root, null, 0);
-    }
 
-    public static long traverse(Node n, Node prevRed, long result) {
-        for (Node child : n.children) {
-            Edge e = Edge.createEdge(n.id, child.id);
-
-            if (redEdges.contains(e)) {
-                if (prevRed != null) {
-                    long n1 = totalCount - prevRed.cnt;
-                    long n2 = child.cnt;
-
-                    System.out.println(n1 * n2);
-                    result += (n1 * n2);
-                    result = result % MOD;
-                }
-
-                result = traverse(child, child, result);
-            } else {
-                result = traverse(child, prevRed, result);
-            }
-        }
-
-        return result;
-    }
-
-    public static Node readTree() {
+    public static void readTree() {
         int n = scanner.nextInt();
         totalCount = n;
 
         // read nodes
-        Node[] nodes = new Node[n];
+        nodes = new Node[n];
         for (int i = 0; i < n; i++) {
             nodes[i] = new Node(i);
         }
@@ -73,7 +47,29 @@ public class KunduTree {
             child.addParent(parent);
         }
 
-        Node root = null;
+        for (Edge e : redEdges) {
+            Node p = e.getChildNode();
+            long c = p.cnt;
+            p.redCnt = c;
+            p.flag = true;
+            p = p.parent;
+
+            while (p != null && !p.flag) {
+                Node p1 = p.parent;
+
+                if (p1 != null) {
+                    Edge e1 = Edge.createEdge(p.id, p1.id);
+                    if (redEdges.contains(e1)) {
+                        break;
+                    }
+                }
+
+                p.redCnt += c;
+                p = p1;
+            }
+        }
+
+        /*Node root = null;
         for (Node node : nodes) {
             if (node.parent != null) {
                 node.parent.addChild(node);
@@ -82,20 +78,24 @@ public class KunduTree {
             }
         }
 
-        return root;
+        return root;*/
     }
 
     public static class Node {
         final int id;
         long cnt;
+        long redCnt;
+        boolean flag;
         Node parent;
         HashSet<Node> children;
 
         public Node(int id) {
             this.id = id;
             this.cnt = 1;
+            this.redCnt = 0;
             this.parent = null;
             this.children = new HashSet<>();
+            this.flag = false;
         }
 
         public void addChild(Node child) {
@@ -137,6 +137,28 @@ public class KunduTree {
         private Edge(int xId, int yId) {
             this.xId = xId;
             this.yId = yId;
+        }
+
+        public Node getParentNode() {
+            Node x = nodes[xId];
+            Node y = nodes[yId];
+
+            if (x.parent != null && x.parent.id == yId) {
+                return y;
+            } else {
+                return x;
+            }
+        }
+
+        public Node getChildNode() {
+            Node x = nodes[xId];
+            Node y = nodes[yId];
+
+            if (x.parent != null && x.parent.id == yId) {
+                return x;
+            } else {
+                return y;
+            }
         }
 
         @Override
