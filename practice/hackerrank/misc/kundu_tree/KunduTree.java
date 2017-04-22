@@ -10,33 +10,39 @@ public class KunduTree {
     private static Node[] nodes;
 
     public static void main(String[] args) {
-        readTree();
-        long result = count();
-
-        System.out.println(result);
+        Node root = readTree();
+        traverse(root);
     }
 
-    public static long count() {
-        long result = 0;
+    public static void traverse(Node root) {
+        Stack<Node> nStack = new Stack<>();
+        Stack<Edge> eStack = new Stack<>();
 
-        for (Edge e : redEdges) {
-            Node c = e.getChildNode();
+        nStack.push(root);
+        eStack.push(null);
 
-            long n1 = totalCount - c.cnt;
-            long n2 = 0;
 
-            for (Node n : c.children) {
-                n2 += n.redCnt;
+        while (!nStack.empty()) {
+            Node n = nStack.pop();
+            Edge previousRed = eStack.pop();
+
+            // TODO:
+
+            for (Node c : n.children) {
+                Edge e = Edge.createEdge(n.id, c.id);
+
+                nStack.push(c);
+
+                if (redEdges.contains(e)) {
+                    eStack.push(e);
+                } else {
+                    eStack.push(previousRed);
+                }
             }
-
-            result += (n1 * n2);
-            result = result % MOD;
         }
-
-        return result;
     }
 
-    public static void readTree() {
+    public static Node readTree() {
         int n = scanner.nextInt();
         totalCount = n;
 
@@ -68,28 +74,6 @@ public class KunduTree {
             child.addParent(parent);
         }
 
-        for (Edge e : redEdges) {
-            Node p = e.getChildNode();
-            long c = p.cnt;
-            p.redCnt = c;
-            p.flag = true;
-            p = p.parent;
-
-            while (p != null && !p.flag) {
-                Node p1 = p.parent;
-
-                if (p1 != null) {
-                    Edge e1 = Edge.createEdge(p.id, p1.id);
-                    if (redEdges.contains(e1)) {
-                        break;
-                    }
-                }
-
-                p.redCnt += c;
-                p = p1;
-            }
-        }
-
         Node root = null;
         for (Node node : nodes) {
             if (node.parent != null) {
@@ -99,29 +83,26 @@ public class KunduTree {
             }
         }
 
-        //return root;
+        return root;
     }
 
     public static class Node {
         final int id;
         long cnt;
-        long redCnt;
-        boolean flag;
         Node parent;
         HashSet<Node> children;
 
         public Node(int id) {
             this.id = id;
             this.cnt = 1;
-            this.redCnt = 0;
             this.parent = null;
             this.children = new HashSet<>();
-            this.flag = false;
         }
 
         public void addChild(Node child) {
             this.children.add(child);
         }
+
 
         public void addParent(Node parent) {
             if (this.parent != null) {
