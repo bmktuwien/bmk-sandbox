@@ -11,32 +11,60 @@ public class KunduTree {
 
     public static void main(String[] args) {
         Node root = readTree();
-        traverse(root);
+        solve(root);
     }
 
-    public static void traverse(Node root) {
-        Stack<Node> nStack = new Stack<>();
-        Stack<Edge> eStack = new Stack<>();
+    public static List<Pair<Edge,Integer>> findRed(Node node) {
+        List<Pair<Edge,Integer>> result = new ArrayList<>();
 
-        nStack.push(root);
-        eStack.push(null);
+        Stack<Node> s = new Stack<>();
+        Stack<Integer> i = new Stack<>();
+        s.add(node);
+        i.add(0);
 
-
-        while (!nStack.empty()) {
-            Node n = nStack.pop();
-            Edge previousRed = eStack.pop();
-
-            // TODO:
+        while (!s.isEmpty()) {
+            Node n = s.pop();
+            int cnt = i.pop();
 
             for (Node c : n.children) {
                 Edge e = Edge.createEdge(n.id, c.id);
 
-                nStack.push(c);
-
                 if (redEdges.contains(e)) {
-                    eStack.push(e);
+                    Pair<Edge,Integer> r = new Pair<>();
+                    r.elem1 = e;
+                    r.elem2 = cnt;
+                    result.add(r);
                 } else {
-                    eStack.push(previousRed);
+                    s.push(c);
+                    i.push(cnt+1);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static void solve(Node root) {
+        LinkedList<Pair<List<Pair<Edge,Integer>>,Edge>> queue = new LinkedList<>();
+        Pair<List<Pair<Edge,Integer>>,Edge> p = new Pair<>();
+        p.elem1 = findRed(root);
+        p.elem2 = null;
+        queue.add(p);
+
+
+        while (!queue.isEmpty()) {
+            Pair<List<Pair<Edge,Integer>>,Edge> p0 = queue.removeFirst();
+
+            for (Pair<Edge,Integer> p1 : p0.elem1) {
+                Edge e = p1.elem1;
+                List<Pair<Edge,Integer>> tmp = findRed(e.getChildNode());
+
+                if (!tmp.isEmpty()) {
+                    Pair<List<Pair<Edge,Integer>>,Edge> p2 = new Pair<>();
+                    p2.elem1 = tmp;
+                    p2.elem2 = e;
+
+                    queue.add(p2);
                 }
             }
         }
@@ -184,5 +212,10 @@ public class KunduTree {
 
             return new Edge(xId1, yId1);
         }
+    }
+
+    public static class Pair<S,T> {
+        public S elem1;
+        public T elem2;
     }
 }
