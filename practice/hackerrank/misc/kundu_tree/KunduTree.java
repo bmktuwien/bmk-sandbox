@@ -14,60 +14,29 @@ public class KunduTree {
         solve(root);
     }
 
-    public static List<Pair<Edge,Integer>> findRed(Node node) {
-        List<Pair<Edge,Integer>> result = new ArrayList<>();
+    public static void addReds(Edge redEdge) {
+        Node n = redEdge.getChildNode();
+        Node p = redEdge.getParentNode();
+        int depth = 0;
+        p.addRed(n.id, depth);
+        Node p2 = p.parent;
 
-        Stack<Node> s = new Stack<>();
-        Stack<Integer> i = new Stack<>();
-        s.add(node);
-        i.add(0);
+        while (p2 != null) {
+            depth++;
 
-        while (!s.isEmpty()) {
-            Node n = s.pop();
-            int cnt = i.pop();
-
-            for (Node c : n.children) {
-                Edge e = Edge.createEdge(n.id, c.id);
-
-                if (redEdges.contains(e)) {
-                    Pair<Edge,Integer> r = new Pair<>();
-                    r.elem1 = e;
-                    r.elem2 = cnt;
-                    result.add(r);
-                } else {
-                    s.push(c);
-                    i.push(cnt+1);
-                }
+            Edge e = Edge.createEdge(p.id, p2.id);
+            if (redEdges.contains(e)) {
+                break;
+            } else {
+                p2.addRed(n.id, depth);
             }
-        }
 
-        return result;
+            p = p2;
+            p2 = p2.parent;
+        }
     }
 
     public static void solve(Node root) {
-        LinkedList<Pair<List<Pair<Edge,Integer>>,Edge>> queue = new LinkedList<>();
-        Pair<List<Pair<Edge,Integer>>,Edge> p = new Pair<>();
-        p.elem1 = findRed(root);
-        p.elem2 = null;
-        queue.add(p);
-
-
-        while (!queue.isEmpty()) {
-            Pair<List<Pair<Edge,Integer>>,Edge> p0 = queue.removeFirst();
-
-            for (Pair<Edge,Integer> p1 : p0.elem1) {
-                Edge e = p1.elem1;
-                List<Pair<Edge,Integer>> tmp = findRed(e.getChildNode());
-
-                if (!tmp.isEmpty()) {
-                    Pair<List<Pair<Edge,Integer>>,Edge> p2 = new Pair<>();
-                    p2.elem1 = tmp;
-                    p2.elem2 = e;
-
-                    queue.add(p2);
-                }
-            }
-        }
     }
 
     public static Node readTree() {
@@ -102,6 +71,12 @@ public class KunduTree {
             child.addParent(parent);
         }
 
+        // add reds
+        for (Edge e : redEdges) {
+            addReds(e);
+        }
+
+        // add children info
         Node root = null;
         for (Node node : nodes) {
             if (node.parent != null) {
@@ -119,18 +94,27 @@ public class KunduTree {
         long cnt;
         Node parent;
         HashSet<Node> children;
+        HashMap<Integer, List<Integer>> reds;
 
         public Node(int id) {
             this.id = id;
             this.cnt = 1;
             this.parent = null;
             this.children = new HashSet<>();
+            this.reds = new HashMap<>();
         }
 
         public void addChild(Node child) {
             this.children.add(child);
         }
 
+        public void addRed(int childId, int depth) {
+            if (!reds.containsKey(childId)) {
+                reds.put(childId, new ArrayList<>());
+            }
+
+            reds.get(childId).add(depth);
+        }
 
         public void addParent(Node parent) {
             if (this.parent != null) {
