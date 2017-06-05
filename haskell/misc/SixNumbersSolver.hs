@@ -2,7 +2,7 @@
 
 import Data.Maybe
 import Data.List
-import Criterion.Main
+--import Criterion.Main
 
 solveSixNumbers :: [Int] -> Int -> Maybe [String]
 solveSixNumbers numbers target = solveSixNumbers' numbers []
@@ -70,10 +70,10 @@ variationPairs (x:xs) = concatMap (\y -> [(x,y),(y,x)]) xs ++ variationPairs xs
 combinationPairs []     = []
 combinationPairs (x:xs) = map ((,) x) xs ++ combinationPairs xs
 
-main :: IO ()
-main = defaultMain [
-  bench "worst case 6 numbers" (nf (solveSixNumbers2 [1,2,3,4,5,6]) 0)
-  ]
+--main :: IO ()
+--main = defaultMain [
+--  bench "worst case 6 numbers" (nf (solveSixNumbers2 [1,2,3,4,5,6]) 0)
+--  ]
 
 -- main :: IO ()
 -- main = print $ solveSixNumbers [1,2,3,4,5,6] 0
